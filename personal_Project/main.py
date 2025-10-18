@@ -63,8 +63,8 @@ TRANSLATIONS = {
         "calorie_calculator": "Calorie Calculator",
         "gender": "Gender",
         "age": "Age",
-        "height": "Height (cm)",
-        "weight": "Weight (kg)",
+        "height": "Height",
+        "weight": "Weight (lbs)",
         "lifestyle": "Lifestyle",
         "exercise_experience": "Exercise Experience",
         "exercise_frequency": "Exercise Frequency",
@@ -105,8 +105,8 @@ TRANSLATIONS = {
         "calorie_calculator": "Calculateur de Calories",
         "gender": "Sexe",
         "age": "Âge",
-        "height": "Taille (cm)",
-        "weight": "Poids (kg)",
+        "height": "Taille",
+        "weight": "Poids (lbs)",
         "lifestyle": "Mode de Vie",
         "exercise_experience": "Expérience d'Exercice",
         "exercise_frequency": "Fréquence d'Exercice",
@@ -147,8 +147,8 @@ TRANSLATIONS = {
         "calorie_calculator": "칼로리 계산기",
         "gender": "성별",
         "age": "나이",
-        "height": "키 (cm)",
-        "weight": "몸무게 (kg)",
+        "height": "키",
+        "weight": "몸무게 (lbs)",
         "lifestyle": "생활습관",
         "exercise_experience": "운동 경력",
         "exercise_frequency": "운동 횟수",
@@ -189,8 +189,8 @@ TRANSLATIONS = {
         "calorie_calculator": "卡路里计算器",
         "gender": "性别",
         "age": "年龄",
-        "height": "身高（厘米）",
-        "weight": "体重（公斤）",
+        "height": "身高",
+        "weight": "体重（磅）",
         "lifestyle": "生活方式",
         "exercise_experience": "运动经验",
         "exercise_frequency": "运动频率",
@@ -231,8 +231,8 @@ TRANSLATIONS = {
         "calorie_calculator": "Calculadora de Calorías",
         "gender": "Género",
         "age": "Edad",
-        "height": "Altura (cm)",
-        "weight": "Peso (kg)",
+        "height": "Altura",
+        "weight": "Peso (lbs)",
         "lifestyle": "Estilo de Vida",
         "exercise_experience": "Experiencia de Ejercicio",
         "exercise_frequency": "Frecuencia de Ejercicio",
@@ -430,11 +430,11 @@ def get_ai_response(question, prompt_type):
     
     # Language-specific system prompts (controlled from backend)
     system_prompts = {
-        "English": f"You are MyGymBro's student-exclusive AI gym routine builder. Create practical and sustainable gym routines that consider students' busy schedules, limited budgets, and various fitness levels.\n\nCurrent available equipment:\n{equipment_info}\n\nUse these equipment to create routines. Respond in English.",
-        "French": f"Vous êtes le constructeur de routines de gym IA exclusif aux étudiants de MyGymBro. Créez des routines de gym pratiques et durables qui tiennent compte des emplois du temps chargés des étudiants, des budgets limités et des différents niveaux de forme.\n\nÉquipement actuellement disponible:\n{equipment_info}\n\nUtilisez cet équipement pour créer des routines. Répondez en français.",
-        "Korean": f"당신은 MyGymBro의 학생 전용 AI 짐 루틴 빌더입니다. 학생들의 바쁜 일정, 제한된 예산, 다양한 체력 수준을 고려하여 실용적이고 지속 가능한 짐 루틴을 만들어주세요.\n\n현재 사용 가능한 기구 목록:\n{equipment_info}\n\n이 기구들을 활용하여 루틴을 만들어주세요. 한국어로 답변해주세요.",
-        "Mandarin": f"你是MyGymBro的学生专用AI健身计划构建器。创建实用且可持续的健身计划，考虑学生的繁忙日程、有限预算和不同的健身水平。\n\n当前可用器械：\n{equipment_info}\n\n使用这些器械创建计划。请用中文回答。",
-        "Spanish": f"Eres el constructor de rutinas de gimnasio IA exclusivo para estudiantes de MyGymBro. Crea rutinas de gimnasio prácticas y sostenibles que consideren los horarios ocupados de los estudiantes, presupuestos limitados y varios niveles de fitness.\n\nEquipamiento actualmente disponible:\n{equipment_info}\n\nUsa este equipamiento para crear rutinas. Responde en español."
+        "English": f"You are MyGymBro's student-exclusive AI gym routine builder and nutrition expert. Create practical and sustainable gym routines that consider students' busy schedules, limited budgets, and various fitness levels. You can also calculate calories, BMR, TDEE, macronutrients, and provide nutrition advice.\n\nCurrent available equipment:\n{equipment_info}\n\nUse these equipment to create routines. For calorie calculations, use the Harris-Benedict equation for BMR and provide detailed macronutrient breakdowns. Respond in English.",
+        "French": f"Vous êtes le constructeur de routines de gym IA exclusif aux étudiants de MyGymBro et expert en nutrition. Créez des routines de gym pratiques et durables qui tiennent compte des emplois du temps chargés des étudiants, des budgets limités et des différents niveaux de forme. Vous pouvez aussi calculer les calories, BMR, TDEE, macronutriments et fournir des conseils nutritionnels.\n\nÉquipement actuellement disponible:\n{equipment_info}\n\nUtilisez cet équipement pour créer des routines. Pour les calculs de calories, utilisez l'équation Harris-Benedict pour le BMR et fournissez des répartitions détaillées des macronutriments. Répondez en français.",
+        "Korean": f"당신은 MyGymBro의 학생 전용 AI 짐 루틴 빌더이자 영양 전문가입니다. 학생들의 바쁜 일정, 제한된 예산, 다양한 체력 수준을 고려하여 실용적이고 지속 가능한 짐 루틴을 만들어주세요. 칼로리, 기초대사량, 총 소모 칼로리, 탄단지 계산과 영양 조언도 제공할 수 있습니다.\n\n현재 사용 가능한 기구 목록:\n{equipment_info}\n\n이 기구들을 활용하여 루틴을 만들어주세요. 칼로리 계산 시에는 Harris-Benedict 공식을 사용하여 기초대사량을 계산하고 상세한 탄단지 분석을 제공해주세요. 한국어로 답변해주세요.",
+        "Mandarin": f"你是MyGymBro的学生专用AI健身计划构建器和营养专家。创建实用且可持续的健身计划，考虑学生的繁忙日程、有限预算和不同的健身水平。你也可以计算卡路里、基础代谢率、总消耗卡路里、宏量营养素并提供营养建议。\n\n当前可用器械：\n{equipment_info}\n\n使用这些器械创建计划。对于卡路里计算，使用Harris-Benedict方程计算基础代谢率并提供详细的宏量营养素分解。请用中文回答。",
+        "Spanish": f"Eres el constructor de rutinas de gimnasio IA exclusivo para estudiantes de MyGymBro y experto en nutrición. Crea rutinas de gimnasio prácticas y sostenibles que consideren los horarios ocupados de los estudiantes, presupuestos limitados y varios niveles de fitness. También puedes calcular calorías, TMB, GET, macronutrientes y proporcionar consejos nutricionales.\n\nEquipamiento actualmente disponible:\n{equipment_info}\n\nUsa este equipamiento para crear rutinas. Para cálculos de calorías, usa la ecuación Harris-Benedict para TMB y proporciona desgloses detallados de macronutrientes. Responde en español."
     }
     
     system_prompt = system_prompts.get(current_language, system_prompts["English"])
@@ -488,88 +488,6 @@ with st.sidebar:
     # Set default prompt mode (controlled from backend)
     selected_prompt = "Basic Mode"  # Default mode, can be changed in backend
     
-    # Calorie Calculator
-    st.markdown(f"### 🔥 {get_text('calorie_calculator')}")
-    
-    # Input fields
-    col1, col2 = st.columns(2)
-    with col1:
-        gender = st.selectbox(get_text("gender"), ["Male", "Female"])
-        age = st.number_input(get_text("age"), min_value=10, max_value=100, value=20)
-    with col2:
-        height = st.number_input(get_text("height"), min_value=100, max_value=250, value=170)
-        weight = st.number_input(get_text("weight"), min_value=30, max_value=200, value=70)
-    
-    lifestyle = st.selectbox(
-        get_text("lifestyle"),
-        ["Lying down 15+ hours", "Almost no movement at home", "Student or office worker", "Active", "Very active"]
-    )
-    
-    col3, col4 = st.columns(2)
-    with col3:
-        exercise_experience = st.selectbox(
-            get_text("exercise_experience"),
-            ["Beginner", "1-3 years", "3-5 years intermediate", "5+ years advanced", "10+ years expert"]
-        )
-        exercise_frequency = st.selectbox(
-            get_text("exercise_frequency"),
-            ["None", "1x/week", "2x/week", "3x/week", "4x/week", "5x/week", "6x/week", "7x/week"]
-        )
-    with col4:
-        fitness_level = st.selectbox(
-            get_text("fitness_level"),
-            ["Very poor", "Poor", "Below average", "Average", "Above average", "Good", "Very good"]
-        )
-    
-    if st.button(f"🔥 {get_text('calculate_calories')}", use_container_width=True):
-        # Calculate BMR
-        bmr = calculate_bmr(gender, age, height, weight)
-        
-        # Calculate activity multiplier
-        activity_multiplier = calculate_activity_multiplier(lifestyle, exercise_frequency, fitness_level)
-        
-        # Calculate total metabolism
-        activity_metabolism = round(bmr * (activity_multiplier - 1), 1)
-        total_metabolism = round(bmr * activity_multiplier, 1)
-        
-        # Display results
-        st.markdown("### 📊 " + get_text("maintenance_calories"))
-        
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric(get_text("bmr"), f"{bmr} kcal")
-        with col2:
-            st.metric(get_text("activity_metabolism"), f"{activity_metabolism} kcal")
-        with col3:
-            st.metric(get_text("total_metabolism"), f"{total_metabolism} kcal")
-        
-        # Goal selection
-        st.markdown("### 🎯 " + get_text("daily_intake"))
-        goal = st.radio("Select your goal:", ["weight_loss", "weight_maintenance", "bulk_up"], 
-                       format_func=lambda x: get_text(x))
-        
-        # Calculate macros
-        macros = calculate_macros(total_metabolism, goal)
-        
-        st.markdown(f"**{get_text('target_calories')}:** {macros['calories']} kcal")
-        
-        # Macronutrients
-        st.markdown("### 🥗 " + get_text("macros"))
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric(get_text("carbs"), f"{macros['carbs']}g")
-        with col2:
-            st.metric(get_text("protein"), f"{macros['protein']}g")
-        with col3:
-            st.metric(get_text("fat"), f"{macros['fat']}g")
-        
-        # Heart rate range
-        min_hr, max_hr = calculate_heart_rate_range(age, fitness_level)
-        st.markdown("### ❤️ " + get_text("cardio_intensity"))
-        st.markdown(f"**{get_text('heart_rate_range')}:** {min_hr} - {max_hr} {get_text('bpm')}")
-        st.info("💡 This is the optimal heart rate range for fat burning during cardio!")
-    
-    st.markdown("---")
     
     # Weird number calculator
     st.markdown(f"**{get_text('routine_calculator')}**")
@@ -579,15 +497,186 @@ with st.sidebar:
         st.success(f"1부터 {n_input}까지의 weird number 개수: {result}")
 
 # Main chat interface
-st.markdown(f"### {get_text('chat_title')}")
+# Quick question boxes for calorie calculator
+st.markdown("### 💪 How about this?")
+st.markdown("Click on a question to get started with your fitness journey:")
+
+# Create question boxes
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    if st.button("🔥 Calculate my maintenance calories", use_container_width=True):
+        st.session_state["show_calorie_form"] = True
+
+with col2:
+    if st.button("📊 What are my macronutrient needs?", use_container_width=True):
+        st.session_state["pre_filled_question"] = "What are my macronutrient needs for weight maintenance? I'm a 20-year-old male, 175cm tall, 70kg, student lifestyle, exercise 3x per week."
+
+with col3:
+    if st.button("❤️ What's my optimal heart rate for fat burning?", use_container_width=True):
+        st.session_state["pre_filled_question"] = "What's my optimal heart rate range for fat burning during cardio? I'm 20 years old with average fitness level."
+
+# Additional question boxes
+col4, col5, col6 = st.columns(3)
+
+with col4:
+    if st.button("💪 Help me plan my bulking diet", use_container_width=True):
+        st.session_state["pre_filled_question"] = "Help me plan my bulking diet. I want to gain muscle mass. I'm a 20-year-old male, 175cm tall, 70kg, student lifestyle, exercise 4x per week."
+
+with col5:
+    if st.button("🎯 Create a weight loss meal plan", use_container_width=True):
+        st.session_state["pre_filled_question"] = "Create a weight loss meal plan for me. I want to lose weight safely. I'm a 20-year-old male, 175cm tall, 70kg, student lifestyle, exercise 3x per week."
+
+with col6:
+    if st.button("📈 Calculate my BMR and TDEE", use_container_width=True):
+        st.session_state["pre_filled_question"] = "Calculate my BMR (Basal Metabolic Rate) and TDEE (Total Daily Energy Expenditure). I'm a 20-year-old male, 175cm tall, 70kg, student lifestyle, exercise 3x per week, average fitness level."
+
+# Calorie calculation form
+if st.session_state.get("show_calorie_form", False):
+    st.markdown("---")
+    st.markdown("### 🔥 " + get_text('calorie_calculator'))
+    st.markdown("Please provide your information for accurate calorie calculation:")
+    
+    # Form inputs
+    col1, col2 = st.columns(2)
+    with col1:
+        gender = st.selectbox(get_text("gender"), ["Male", "Female"], key="form_gender")
+        age = st.number_input(get_text("age"), min_value=10, max_value=100, value=20, key="form_age")
+    with col2:
+        st.markdown("**Height:**")
+        col_height1, col_height2 = st.columns(2)
+        with col_height1:
+            feet = st.number_input("Feet", min_value=3, max_value=8, value=5, key="form_feet")
+        with col_height2:
+            inches = st.number_input("Inches", min_value=0, max_value=11, value=9, key="form_inches")
+        height = feet * 30.48 + inches * 2.54  # Convert to cm for calculation
+        weight_lbs = st.number_input("Weight (lbs)", min_value=66, max_value=440, value=154, key="form_weight_lbs")
+        weight = weight_lbs * 0.453592  # Convert to kg for calculation
+    
+    lifestyle = st.selectbox(
+        get_text("lifestyle"),
+        ["Lying down 15+ hours", "Almost no movement at home", "Student or office worker", "Active", "Very active"],
+        key="form_lifestyle"
+    )
+    
+    col3, col4 = st.columns(2)
+    with col3:
+        exercise_experience = st.selectbox(
+            get_text("exercise_experience"),
+            ["Beginner", "1-3 years", "3-5 years intermediate", "5+ years advanced", "10+ years expert"],
+            key="form_experience"
+        )
+        exercise_frequency = st.selectbox(
+            get_text("exercise_frequency"),
+            ["None", "1x/week", "2x/week", "3x/week", "4x/week", "5x/week", "6x/week", "7x/week"],
+            key="form_frequency"
+        )
+    with col4:
+        fitness_level = st.selectbox(
+            get_text("fitness_level"),
+            ["Very poor", "Poor", "Below average", "Average", "Above average", "Good", "Very good"],
+            key="form_fitness"
+        )
+    
+    col5, col6 = st.columns(2)
+    with col5:
+        if st.button(f"🔥 {get_text('calculate_calories')}", use_container_width=True):
+            # Calculate BMR
+            bmr = calculate_bmr(gender, age, height, weight)
+            
+            # Calculate activity multiplier
+            activity_multiplier = calculate_activity_multiplier(lifestyle, exercise_frequency, fitness_level)
+            
+            # Calculate total metabolism
+            activity_metabolism = round(bmr * (activity_multiplier - 1), 1)
+            total_metabolism = round(bmr * activity_multiplier, 1)
+            
+            # Display results
+            st.markdown("### 📊 " + get_text("maintenance_calories"))
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric(get_text("bmr"), f"{bmr} kcal")
+            with col2:
+                st.metric(get_text("activity_metabolism"), f"{activity_metabolism} kcal")
+            with col3:
+                st.metric(get_text("total_metabolism"), f"{total_metabolism} kcal")
+            
+            # Store calculation results in session state
+            st.session_state["calorie_results"] = {
+                "bmr": bmr,
+                "activity_metabolism": activity_metabolism,
+                "total_metabolism": total_metabolism,
+                "age": age,
+                "fitness_level": fitness_level
+            }
+            st.session_state["show_results"] = True
+    
+    with col6:
+        if st.button("❌ Close Form", use_container_width=True):
+            st.session_state["show_calorie_form"] = False
+            st.rerun()
+
+# Show results section
+if st.session_state.get("show_results", False) and st.session_state.get("calorie_results"):
+    results = st.session_state["calorie_results"]
+    
+    # Display results
+    st.markdown("### 📊 " + get_text("maintenance_calories"))
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric(get_text("bmr"), f"{results['bmr']} kcal")
+    with col2:
+        st.metric(get_text("activity_metabolism"), f"{results['activity_metabolism']} kcal")
+    with col3:
+        st.metric(get_text("total_metabolism"), f"{results['total_metabolism']} kcal")
+    
+    # Goal selection
+    st.markdown("### 🎯 " + get_text("daily_intake"))
+    goal = st.radio("Select your goal:", ["weight_loss", "weight_maintenance", "bulk_up"], 
+                   format_func=lambda x: get_text(x), key="goal_selection")
+    
+    # Calculate macros based on selected goal
+    macros = calculate_macros(results['total_metabolism'], goal)
+    
+    st.markdown(f"**{get_text('target_calories')}:** {macros['calories']} kcal")
+    
+    # Macronutrients
+    st.markdown("### 🥗 " + get_text("macros"))
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric(get_text("carbs"), f"{macros['carbs']}g")
+    with col2:
+        st.metric(get_text("protein"), f"{macros['protein']}g")
+    with col3:
+        st.metric(get_text("fat"), f"{macros['fat']}g")
+    
+    # Heart rate range
+    min_hr, max_hr = calculate_heart_rate_range(results['age'], results['fitness_level'])
+    st.markdown("### ❤️ " + get_text("cardio_intensity"))
+    st.markdown(f"**{get_text('heart_rate_range')}:** {min_hr} - {max_hr} {get_text('bpm')}")
+    st.info("💡 This is the optimal heart rate range for fat burning during cardio!")
+    
+    # Close results button
+    if st.button("❌ Close Results", key="close_results"):
+        st.session_state["show_results"] = False
+        st.session_state["calorie_results"] = None
+        st.rerun()
+
+st.markdown("---")
 
 # Display chat messages
 for message in st.session_state["messages"]:
     with st.chat_message(message["role"]):
         st.write(message["content"])
 
-# Chat input
-user_input = st.chat_input(get_text("chat_placeholder"))
+# Handle pre-filled questions
+if "pre_filled_question" in st.session_state and st.session_state["pre_filled_question"]:
+    user_input = st.session_state["pre_filled_question"]
+    st.session_state["pre_filled_question"] = None  # Clear after use
+else:
+    user_input = st.chat_input(get_text("chat_placeholder"))
 
 if user_input:
     # Display user message

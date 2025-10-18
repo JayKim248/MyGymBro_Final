@@ -57,9 +57,6 @@ TRANSLATIONS = {
         "app_title": "MyGymBro - Student Gym Routine Builder",
         "welcome": "Welcome to MyGymBro! 💪",
         "subtitle": "Your AI-powered gym routine builder for students",
-        "routine_calculator": "Routine Set Calculator",
-        "number_input": "Enter number (1 to n)",
-        "calculate": "Calculate",
         "calorie_calculator": "Calorie Calculator",
         "gender": "Gender",
         "age": "Age",
@@ -100,9 +97,6 @@ TRANSLATIONS = {
         "app_title": "MyGymBro - Créateur de Routine de Gym pour Étudiants",
         "welcome": "Bienvenue chez MyGymBro! 💪",
         "subtitle": "Votre créateur de routine de gym alimenté par l'IA pour étudiants",
-        "routine_calculator": "Calculateur de Série de Routine",
-        "number_input": "Entrez un nombre (1 à n)",
-        "calculate": "Calculer",
         "calorie_calculator": "Calculateur de Calories",
         "gender": "Sexe",
         "age": "Âge",
@@ -143,9 +137,6 @@ TRANSLATIONS = {
         "app_title": "MyGymBro - 학생용 짐 루틴 빌더",
         "welcome": "MyGymBro에 오신 것을 환영합니다! 💪",
         "subtitle": "학생들을 위한 AI 기반 짐 루틴 빌더",
-        "routine_calculator": "루틴 세트 계산기",
-        "number_input": "숫자 입력 (1부터 n까지)",
-        "calculate": "계산하기",
         "calorie_calculator": "칼로리 계산기",
         "gender": "성별",
         "age": "나이",
@@ -186,9 +177,6 @@ TRANSLATIONS = {
         "app_title": "MyGymBro - 学生健身计划构建器",
         "welcome": "欢迎使用MyGymBro！💪",
         "subtitle": "您的AI驱动学生健身计划构建器",
-        "routine_calculator": "计划组计算器",
-        "number_input": "输入数字（1到n）",
-        "calculate": "计算",
         "calorie_calculator": "卡路里计算器",
         "gender": "性别",
         "age": "年龄",
@@ -229,9 +217,6 @@ TRANSLATIONS = {
         "app_title": "MyGymBro - Constructor de Rutinas de Gimnasio para Estudiantes",
         "welcome": "¡Bienvenido a MyGymBro! 💪",
         "subtitle": "Tu constructor de rutinas de gimnasio con IA para estudiantes",
-        "routine_calculator": "Calculadora de Series de Rutina",
-        "number_input": "Ingrese número (1 a n)",
-        "calculate": "Calcular",
         "calorie_calculator": "Calculadora de Calorías",
         "gender": "Género",
         "age": "Edad",
@@ -315,17 +300,6 @@ def get_equipment_summary():
         return "\n".join(equipment_list)
     return "Equipment data not available"
 
-# Utility function
-def weird(num):
-    digits = [int(d) for d in str(num)]
-    add_on = sum(digits)
-    return 1 if num % add_on == 0 else 0
-
-def calculate_weird_numbers(n):
-    result = 0
-    for i in range(1, n + 1):
-        result += weird(i)
-    return result
 
 # Calorie calculation functions
 def calculate_bmr(gender, age, height, weight):
@@ -495,12 +469,6 @@ with st.sidebar:
     selected_prompt = "Basic Mode"  # Default mode, can be changed in backend
     
     
-    # Weird number calculator
-    st.markdown(f"**{get_text('routine_calculator')}**")
-    n_input = st.number_input(get_text("number_input"), min_value=1, max_value=1000, value=10)
-    if st.button(get_text("calculate")):
-        result = calculate_weird_numbers(n_input)
-        st.success(f"1부터 {n_input}까지의 weird number 개수: {result}")
 
 # Main chat interface
 # Personal Information Section

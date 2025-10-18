@@ -87,7 +87,7 @@ TRANSLATIONS = {
         "heart_rate_range": "Heart Rate Range",
         "bpm": "bpm",
         "chat_title": "💬 Chat with MyGymBro",
-        "chat_placeholder": "💬 Ask about gym routines or exercises!",
+        "chat_placeholder": "💬 Ask follow-up questions or request more details!",
         "loading_message": "🤖 MyGymBro is preparing an answer...",
         "error_message": "Hello! I'm MyGymBro. Currently there's a network connection issue and I can't provide AI responses. Please try again later. In the meantime, try using the BMI calculator or routine set calculator!",
         "footer": "💪 MyGymBro - Student Gym Routine Builder | Powered by OpenAI",
@@ -129,7 +129,7 @@ TRANSLATIONS = {
         "heart_rate_range": "Plage de Fréquence Cardiaque",
         "bpm": "bpm",
         "chat_title": "💬 Discutez avec MyGymBro",
-        "chat_placeholder": "💬 Posez des questions sur les routines de gym ou exercices!",
+        "chat_placeholder": "💬 Posez des questions de suivi ou demandez plus de détails!",
         "loading_message": "🤖 MyGymBro prépare une réponse...",
         "error_message": "Bonjour! Je suis MyGymBro. Actuellement il y a un problème de connexion réseau et je ne peux pas fournir de réponses IA. Veuillez réessayer plus tard. En attendant, essayez le calculateur de série de routine!",
         "footer": "💪 MyGymBro - Créateur de Routine de Gym pour Étudiants | Alimenté par OpenAI",
@@ -171,7 +171,7 @@ TRANSLATIONS = {
         "heart_rate_range": "추천 심박수 범위",
         "bpm": "bpm",
         "chat_title": "💬 MyGymBro와 대화하기",
-        "chat_placeholder": "💬 짐 루틴이나 운동에 대해 궁금한 것을 물어보세요!",
+        "chat_placeholder": "💬 추가 질문이나 더 자세한 정보를 요청하세요!",
         "loading_message": "🤖 MyGymBro가 답변을 준비하고 있습니다...",
         "error_message": "안녕하세요! MyGymBro입니다. 현재 네트워크 연결에 문제가 있어 AI 응답을 받을 수 없습니다. 잠시 후 다시 시도해주세요. 그동안 루틴 세트 계산기를 사용해보세요!",
         "footer": "💪 MyGymBro - Student Gym Routine Builder | Powered by OpenAI",
@@ -213,7 +213,7 @@ TRANSLATIONS = {
         "heart_rate_range": "推荐心率范围",
         "bpm": "bpm",
         "chat_title": "💬 与MyGymBro聊天",
-        "chat_placeholder": "💬 询问健身计划或运动相关问题！",
+        "chat_placeholder": "💬 提出后续问题或请求更多详细信息！",
         "loading_message": "🤖 MyGymBro正在准备答案...",
         "error_message": "你好！我是MyGymBro。目前网络连接有问题，无法提供AI回复。请稍后再试。同时，可以试试计划组计算器！",
         "footer": "💪 MyGymBro - 学生健身计划构建器 | 由OpenAI驱动",
@@ -255,7 +255,7 @@ TRANSLATIONS = {
         "heart_rate_range": "Rango de Frecuencia Cardíaca",
         "bpm": "lpm",
         "chat_title": "💬 Chatea con MyGymBro",
-        "chat_placeholder": "💬 ¡Pregunta sobre rutinas de gimnasio o ejercicios!",
+        "chat_placeholder": "💬 ¡Haz preguntas de seguimiento o solicita más detalles!",
         "loading_message": "🤖 MyGymBro está preparando una respuesta...",
         "error_message": "¡Hola! Soy MyGymBro. Actualmente hay un problema de conexión de red y no puedo proporcionar respuestas de IA. Por favor, inténtalo de nuevo más tarde. Mientras tanto, ¡prueba la calculadora de series de rutina!",
         "footer": "💪 MyGymBro - Constructor de Rutinas de Gimnasio para Estudiantes | Impulsado por OpenAI",
@@ -268,6 +268,7 @@ TRANSLATIONS = {
 def get_text(key):
     """Get translated text based on current language."""
     return TRANSLATIONS[st.session_state["language"]].get(key, key)
+
 
 # Load gym equipment data
 def load_gym_equipment():
@@ -430,11 +431,11 @@ def get_ai_response(question, prompt_type):
     
     # Language-specific system prompts (controlled from backend)
     system_prompts = {
-        "English": f"You are MyGymBro's student-exclusive AI gym routine builder and nutrition expert. Create practical and sustainable gym routines that consider students' busy schedules, limited budgets, and various fitness levels. You can also calculate calories, BMR, TDEE, macronutrients, and provide nutrition advice.\n\nCurrent available equipment:\n{equipment_info}\n\nUse these equipment to create routines. For calorie calculations, use the Harris-Benedict equation for BMR and provide detailed macronutrient breakdowns. Respond in English.",
-        "French": f"Vous êtes le constructeur de routines de gym IA exclusif aux étudiants de MyGymBro et expert en nutrition. Créez des routines de gym pratiques et durables qui tiennent compte des emplois du temps chargés des étudiants, des budgets limités et des différents niveaux de forme. Vous pouvez aussi calculer les calories, BMR, TDEE, macronutriments et fournir des conseils nutritionnels.\n\nÉquipement actuellement disponible:\n{equipment_info}\n\nUtilisez cet équipement pour créer des routines. Pour les calculs de calories, utilisez l'équation Harris-Benedict pour le BMR et fournissez des répartitions détaillées des macronutriments. Répondez en français.",
-        "Korean": f"당신은 MyGymBro의 학생 전용 AI 짐 루틴 빌더이자 영양 전문가입니다. 학생들의 바쁜 일정, 제한된 예산, 다양한 체력 수준을 고려하여 실용적이고 지속 가능한 짐 루틴을 만들어주세요. 칼로리, 기초대사량, 총 소모 칼로리, 탄단지 계산과 영양 조언도 제공할 수 있습니다.\n\n현재 사용 가능한 기구 목록:\n{equipment_info}\n\n이 기구들을 활용하여 루틴을 만들어주세요. 칼로리 계산 시에는 Harris-Benedict 공식을 사용하여 기초대사량을 계산하고 상세한 탄단지 분석을 제공해주세요. 한국어로 답변해주세요.",
-        "Mandarin": f"你是MyGymBro的学生专用AI健身计划构建器和营养专家。创建实用且可持续的健身计划，考虑学生的繁忙日程、有限预算和不同的健身水平。你也可以计算卡路里、基础代谢率、总消耗卡路里、宏量营养素并提供营养建议。\n\n当前可用器械：\n{equipment_info}\n\n使用这些器械创建计划。对于卡路里计算，使用Harris-Benedict方程计算基础代谢率并提供详细的宏量营养素分解。请用中文回答。",
-        "Spanish": f"Eres el constructor de rutinas de gimnasio IA exclusivo para estudiantes de MyGymBro y experto en nutrición. Crea rutinas de gimnasio prácticas y sostenibles que consideren los horarios ocupados de los estudiantes, presupuestos limitados y varios niveles de fitness. También puedes calcular calorías, TMB, GET, macronutrientes y proporcionar consejos nutricionales.\n\nEquipamiento actualmente disponible:\n{equipment_info}\n\nUsa este equipamiento para crear rutinas. Para cálculos de calorías, usa la ecuación Harris-Benedict para TMB y proporciona desgloses detallados de macronutrientes. Responde en español."
+        "English": f"You are MyGymBro's AI workout planner for students. Your PRIMARY function is to create detailed, practical workout routines using ONLY the available gym equipment. Focus on creating complete workout plans with specific exercises, sets, reps, and rest periods.\n\nAvailable gym equipment:\n{equipment_info}\n\nWhen creating workout routines:\n- Use ONLY the equipment listed above\n- Provide specific sets, reps, and rest periods\n- Include proper warm-up and cool-down\n- Consider the user's fitness level and experience\n- Make routines practical for students with limited time\n- Explain proper form for each exercise\n- Suggest weight ranges based on available equipment\n\nFor weekly workout splits:\n- Plan out each day of the week (Monday-Sunday)\n- Include rest days for recovery\n- Balance muscle groups throughout the week\n- Consider the user's exercise frequency\n- Provide progression recommendations\n- Include variety to prevent boredom\n\nYou can also provide basic nutrition advice and calorie calculations when asked. Respond in English.",
+        "French": f"Vous êtes le planificateur d'entraînements IA de MyGymBro pour les étudiants. Votre FONCTION PRINCIPALE est de créer des routines d'entraînement détaillées et pratiques en utilisant UNIQUEMENT l'équipement de gym disponible. Concentrez-vous sur la création de plans d'entraînement complets avec des exercices spécifiques, des séries, des répétitions et des périodes de repos.\n\nÉquipement de gym disponible:\n{equipment_info}\n\nLors de la création de routines d'entraînement:\n- Utilisez UNIQUEMENT l'équipement listé ci-dessus\n- Fournissez des séries, répétitions et périodes de repos spécifiques\n- Incluez un échauffement et une récupération appropriés\n- Considérez le niveau de forme et l'expérience de l'utilisateur\n- Rendez les routines pratiques pour les étudiants avec un temps limité\n- Expliquez la forme appropriée pour chaque exercice\n- Suggérez des plages de poids basées sur l'équipement disponible\n\nPour les splits d'entraînement hebdomadaires:\n- Planifiez chaque jour de la semaine (lundi-dimanche)\n- Incluez des jours de repos pour la récupération\n- Équilibrez les groupes musculaires tout au long de la semaine\n- Considérez la fréquence d'exercice de l'utilisateur\n- Fournissez des recommandations de progression\n- Incluez de la variété pour éviter l'ennui\n\nVous pouvez aussi fournir des conseils nutritionnels de base et des calculs de calories quand demandé. Répondez en français.",
+        "Korean": f"당신은 MyGymBro의 학생용 AI 운동 계획자입니다. 당신의 주요 기능은 사용 가능한 짐 기구만을 사용하여 상세하고 실용적인 운동 루틴을 만드는 것입니다. 구체적인 운동, 세트, 반복 횟수, 휴식 시간이 포함된 완전한 운동 계획을 만드는 데 집중하세요.\n\n사용 가능한 짐 기구:\n{equipment_info}\n\n운동 루틴을 만들 때:\n- 위에 나열된 기구만 사용하세요\n- 구체적인 세트, 반복 횟수, 휴식 시간을 제공하세요\n- 적절한 워밍업과 쿨다운을 포함하세요\n- 사용자의 체력 수준과 경험을 고려하세요\n- 시간이 제한된 학생들에게 실용적인 루틴을 만드세요\n- 각 운동의 올바른 자세를 설명하세요\n- 사용 가능한 기구를 바탕으로 무게 범위를 제안하세요\n\n요청받을 때 기본적인 영양 조언과 칼로리 계산도 제공할 수 있습니다. 한국어로 답변해주세요.",
+        "Mandarin": f"你是MyGymBro的学生AI健身计划制定者。你的主要功能是仅使用可用的健身房设备创建详细、实用的锻炼计划。专注于创建包含具体练习、组数、次数和休息时间的完整锻炼计划。\n\n可用健身房设备：\n{equipment_info}\n\n制定锻炼计划时：\n- 仅使用上述列出的设备\n- 提供具体的组数、次数和休息时间\n- 包括适当的热身和冷却\n- 考虑用户的健身水平和经验\n- 为时间有限的学生制定实用的计划\n- 解释每个练习的正确姿势\n- 根据可用设备建议重量范围\n\n被询问时也可以提供基本营养建议和卡路里计算。请用中文回答。",
+        "Spanish": f"Eres el planificador de entrenamientos IA de MyGymBro para estudiantes. Tu FUNCIÓN PRINCIPAL es crear rutinas de entrenamiento detalladas y prácticas usando ÚNICAMENTE el equipamiento de gimnasio disponible. Enfócate en crear planes de entrenamiento completos con ejercicios específicos, series, repeticiones y períodos de descanso.\n\nEquipamiento de gimnasio disponible:\n{equipment_info}\n\nAl crear rutinas de entrenamiento:\n- Usa ÚNICAMENTE el equipamiento listado arriba\n- Proporciona series, repeticiones y períodos de descanso específicos\n- Incluye calentamiento y enfriamiento apropiados\n- Considera el nivel de fitness y experiencia del usuario\n- Haz rutinas prácticas para estudiantes con tiempo limitado\n- Explica la forma correcta para cada ejercicio\n- Sugiere rangos de peso basados en el equipamiento disponible\n\nTambién puedes proporcionar consejos nutricionales básicos y cálculos de calorías cuando se te pida. Responde en español."
     }
     
     system_prompt = system_prompts.get(current_language, system_prompts["English"])
@@ -497,125 +498,138 @@ with st.sidebar:
         st.success(f"1부터 {n_input}까지의 weird number 개수: {result}")
 
 # Main chat interface
-# Quick question boxes for calorie calculator
-st.markdown("### 💪 How about this?")
-st.markdown("Click on a question to get started with your fitness journey:")
+# Personal Information Section
+st.markdown("### 📝 Your Information")
+st.markdown("Please provide your information for personalized recommendations:")
 
-# Create question boxes
+# Personal info inputs
+col1, col2 = st.columns(2)
+with col1:
+    gender = st.selectbox(get_text("gender"), ["Male", "Female"], key="main_gender")
+    age = st.number_input(get_text("age"), min_value=10, max_value=100, value=20, key="main_age")
+with col2:
+    st.markdown("**Height:**")
+    col_height1, col_height2 = st.columns(2)
+    with col_height1:
+        feet = st.number_input("Feet", min_value=3, max_value=8, value=5, key="main_feet")
+    with col_height2:
+        inches = st.number_input("Inches", min_value=0, max_value=11, value=9, key="main_inches")
+    height = feet * 30.48 + inches * 2.54  # Convert to cm for calculation
+    weight_lbs = st.number_input("Weight (lbs)", min_value=66, max_value=440, value=154, key="main_weight_lbs")
+    weight = weight_lbs * 0.453592  # Convert to kg for calculation
+
+lifestyle = st.selectbox(
+    get_text("lifestyle"),
+    ["Lying down 15+ hours", "Almost no movement at home", "Student or office worker", "Active", "Very active"],
+    key="main_lifestyle"
+)
+
+col3, col4 = st.columns(2)
+with col3:
+    exercise_experience = st.selectbox(
+        get_text("exercise_experience"),
+        ["Beginner", "1-3 years", "3-5 years intermediate", "5+ years advanced", "10+ years expert"],
+        key="main_experience"
+    )
+    exercise_frequency = st.selectbox(
+        get_text("exercise_frequency"),
+        ["None", "1x/week", "2x/week", "3x/week", "4x/week", "5x/week", "6x/week", "7x/week"],
+        key="main_frequency"
+    )
+with col4:
+    fitness_level = st.selectbox(
+        get_text("fitness_level"),
+        ["Very poor", "Poor", "Below average", "Average", "Above average", "Good", "Very good"],
+        key="main_fitness"
+    )
+
+st.markdown("---")
+
+# Main workout plan generator
+st.markdown("### 🏋️ Create Your Workout Plan")
+st.markdown("Get a personalized workout routine based on your gym's available equipment:")
+
+# Quick workout plan buttons
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    if st.button("🔥 Calculate my maintenance calories", use_container_width=True):
-        st.session_state["show_calorie_form"] = True
+    if st.button("💪 Full Body Workout", use_container_width=True):
+        st.session_state["pre_filled_question"] = f"Create a full body workout routine for me using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}. Focus on compound movements and include proper warm-up and cool-down."
 
 with col2:
-    if st.button("📊 What are my macronutrient needs?", use_container_width=True):
-        st.session_state["pre_filled_question"] = "What are my macronutrient needs for weight maintenance? I'm a 20-year-old male, 175cm tall, 70kg, student lifestyle, exercise 3x per week."
+    if st.button("🔥 Upper Body Focus", use_container_width=True):
+        st.session_state["pre_filled_question"] = f"Create an upper body focused workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}. Include chest, back, shoulders, and arms exercises."
 
 with col3:
-    if st.button("❤️ What's my optimal heart rate for fat burning?", use_container_width=True):
-        st.session_state["pre_filled_question"] = "What's my optimal heart rate range for fat burning during cardio? I'm 20 years old with average fitness level."
+    if st.button("🦵 Lower Body Focus", use_container_width=True):
+        st.session_state["pre_filled_question"] = f"Create a lower body focused workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}. Include legs, glutes, and core exercises."
 
-# Additional question boxes
+# Additional workout options
 col4, col5, col6 = st.columns(3)
 
 with col4:
-    if st.button("💪 Help me plan my bulking diet", use_container_width=True):
-        st.session_state["pre_filled_question"] = "Help me plan my bulking diet. I want to gain muscle mass. I'm a 20-year-old male, 175cm tall, 70kg, student lifestyle, exercise 4x per week."
+    if st.button("📅 Full Weekly Split", use_container_width=True):
+        st.session_state["pre_filled_question"] = f"Create a complete weekly workout split for me using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}. Plan out each day of the week with specific exercises, sets, reps, and rest days. Make it a balanced program that targets all muscle groups throughout the week."
 
 with col5:
-    if st.button("🎯 Create a weight loss meal plan", use_container_width=True):
-        st.session_state["pre_filled_question"] = "Create a weight loss meal plan for me. I want to lose weight safely. I'm a 20-year-old male, 175cm tall, 70kg, student lifestyle, exercise 3x per week."
+    if st.button("⚡ Quick 30-min Workout", use_container_width=True):
+        st.session_state["pre_filled_question"] = f"Create a quick 30-minute workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}. Make it efficient and effective for busy students."
 
 with col6:
-    if st.button("📈 Calculate my BMR and TDEE", use_container_width=True):
-        st.session_state["pre_filled_question"] = "Calculate my BMR (Basal Metabolic Rate) and TDEE (Total Daily Energy Expenditure). I'm a 20-year-old male, 175cm tall, 70kg, student lifestyle, exercise 3x per week, average fitness level."
+    if st.button("🏃 Cardio + Strength", use_container_width=True):
+        st.session_state["pre_filled_question"] = f"Create a cardio and strength combined workout using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}. Include both cardio and strength training elements."
 
-# Calorie calculation form
-if st.session_state.get("show_calorie_form", False):
-    st.markdown("---")
-    st.markdown("### 🔥 " + get_text('calorie_calculator'))
-    st.markdown("Please provide your information for accurate calorie calculation:")
+# More workout options
+col7, col8, col9 = st.columns(3)
+
+with col7:
+    if st.button("🎯 Beginner-Friendly", use_container_width=True):
+        st.session_state["pre_filled_question"] = f"Create a beginner-friendly workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, beginner fitness level, exercise {exercise_frequency.lower()}. Focus on proper form and progression."
+
+with col8:
+    if st.button("💪 Push/Pull/Legs Split", use_container_width=True):
+        st.session_state["pre_filled_question"] = f"Create a push/pull/legs workout split using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}. Include push day (chest, shoulders, triceps), pull day (back, biceps), and legs day with proper rest between muscle groups."
+
+with col9:
+    if st.button("🔥 High Intensity Training", use_container_width=True):
+        st.session_state["pre_filled_question"] = f"Create a high intensity training (HIT) workout using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}. Focus on maximum effort with shorter rest periods and higher intensity."
+
+# Calorie calculator option
+st.markdown("---")
+st.markdown("### 📊 Additional Tools")
+
+col7, col8 = st.columns(2)
+
+with col7:
+    if st.button("🔥 Calculate my maintenance calories", use_container_width=True):
+        st.session_state["show_calorie_calculation"] = True
+
+with col8:
+    if st.button("💬 Ask MyGymBro anything", use_container_width=True):
+        st.session_state["pre_filled_question"] = "I have a question about my fitness routine or nutrition. Please help me with personalized advice based on my information."
+
+# Calorie calculation using main page inputs
+if st.session_state.get("show_calorie_calculation", False):
+    # Calculate BMR using main page inputs
+    bmr = calculate_bmr(gender, age, height, weight)
     
-    # Form inputs
-    col1, col2 = st.columns(2)
-    with col1:
-        gender = st.selectbox(get_text("gender"), ["Male", "Female"], key="form_gender")
-        age = st.number_input(get_text("age"), min_value=10, max_value=100, value=20, key="form_age")
-    with col2:
-        st.markdown("**Height:**")
-        col_height1, col_height2 = st.columns(2)
-        with col_height1:
-            feet = st.number_input("Feet", min_value=3, max_value=8, value=5, key="form_feet")
-        with col_height2:
-            inches = st.number_input("Inches", min_value=0, max_value=11, value=9, key="form_inches")
-        height = feet * 30.48 + inches * 2.54  # Convert to cm for calculation
-        weight_lbs = st.number_input("Weight (lbs)", min_value=66, max_value=440, value=154, key="form_weight_lbs")
-        weight = weight_lbs * 0.453592  # Convert to kg for calculation
+    # Calculate activity multiplier
+    activity_multiplier = calculate_activity_multiplier(lifestyle, exercise_frequency, fitness_level)
     
-    lifestyle = st.selectbox(
-        get_text("lifestyle"),
-        ["Lying down 15+ hours", "Almost no movement at home", "Student or office worker", "Active", "Very active"],
-        key="form_lifestyle"
-    )
+    # Calculate total metabolism
+    activity_metabolism = round(bmr * (activity_multiplier - 1), 1)
+    total_metabolism = round(bmr * activity_multiplier, 1)
     
-    col3, col4 = st.columns(2)
-    with col3:
-        exercise_experience = st.selectbox(
-            get_text("exercise_experience"),
-            ["Beginner", "1-3 years", "3-5 years intermediate", "5+ years advanced", "10+ years expert"],
-            key="form_experience"
-        )
-        exercise_frequency = st.selectbox(
-            get_text("exercise_frequency"),
-            ["None", "1x/week", "2x/week", "3x/week", "4x/week", "5x/week", "6x/week", "7x/week"],
-            key="form_frequency"
-        )
-    with col4:
-        fitness_level = st.selectbox(
-            get_text("fitness_level"),
-            ["Very poor", "Poor", "Below average", "Average", "Above average", "Good", "Very good"],
-            key="form_fitness"
-        )
-    
-    col5, col6 = st.columns(2)
-    with col5:
-        if st.button(f"🔥 {get_text('calculate_calories')}", use_container_width=True):
-            # Calculate BMR
-            bmr = calculate_bmr(gender, age, height, weight)
-            
-            # Calculate activity multiplier
-            activity_multiplier = calculate_activity_multiplier(lifestyle, exercise_frequency, fitness_level)
-            
-            # Calculate total metabolism
-            activity_metabolism = round(bmr * (activity_multiplier - 1), 1)
-            total_metabolism = round(bmr * activity_multiplier, 1)
-            
-            # Display results
-            st.markdown("### 📊 " + get_text("maintenance_calories"))
-            
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric(get_text("bmr"), f"{bmr} kcal")
-            with col2:
-                st.metric(get_text("activity_metabolism"), f"{activity_metabolism} kcal")
-            with col3:
-                st.metric(get_text("total_metabolism"), f"{total_metabolism} kcal")
-            
-            # Store calculation results in session state
-            st.session_state["calorie_results"] = {
-                "bmr": bmr,
-                "activity_metabolism": activity_metabolism,
-                "total_metabolism": total_metabolism,
-                "age": age,
-                "fitness_level": fitness_level
-            }
-            st.session_state["show_results"] = True
-    
-    with col6:
-        if st.button("❌ Close Form", use_container_width=True):
-            st.session_state["show_calorie_form"] = False
-            st.rerun()
+    # Store calculation results in session state
+    st.session_state["calorie_results"] = {
+        "bmr": bmr,
+        "activity_metabolism": activity_metabolism,
+        "total_metabolism": total_metabolism,
+        "age": age,
+        "fitness_level": fitness_level
+    }
+    st.session_state["show_results"] = True
+    st.session_state["show_calorie_calculation"] = False
 
 # Show results section
 if st.session_state.get("show_results", False) and st.session_state.get("calorie_results"):
@@ -671,6 +685,10 @@ for message in st.session_state["messages"]:
     with st.chat_message(message["role"]):
         st.write(message["content"])
 
+# Show helpful message if there are messages
+if st.session_state["messages"]:
+    st.info("💡 You can keep asking follow-up questions! Ask for modifications, more details, or different workout variations.")
+
 # Handle pre-filled questions
 if "pre_filled_question" in st.session_state and st.session_state["pre_filled_question"]:
     user_input = st.session_state["pre_filled_question"]
@@ -694,11 +712,15 @@ if user_input:
         st.session_state["messages"].append({"role": "user", "content": user_input})
         st.session_state["messages"].append({"role": "assistant", "content": ai_answer})
         
+        # Force rerun to show the new messages and enable continuous chat
+        st.rerun()
+        
     except Exception as e:
         # Show a helpful message instead of error
         st.chat_message("assistant").write(get_text("error_message"))
         st.session_state["messages"].append({"role": "user", "content": user_input})
         st.session_state["messages"].append({"role": "assistant", "content": "Network connection issue - AI response unavailable."})
+        st.rerun()
 
 # Footer
 st.markdown("---")

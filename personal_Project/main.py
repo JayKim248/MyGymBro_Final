@@ -402,42 +402,6 @@ with st.sidebar:
     
     st.markdown("---")
     
-    # BMI Calculator
-    st.markdown(f"### 🎓 {get_text('student_profile')}")
-    st.markdown(f"**{get_text('bmi_calculator')}**")
-    col1, col2 = st.columns(2)
-    with col1:
-        height = st.number_input(get_text("height"), min_value=100.0, max_value=250.0, value=170.0)
-    with col2:
-        weight = st.number_input(get_text("weight"), min_value=30.0, max_value=200.0, value=70.0)
-    
-    if st.button(get_text("calculate_bmi")):
-        bmi = weight / ((height/100) ** 2)
-        # BMI status translations
-        bmi_status = {
-            "English": {"underweight": "Underweight", "normal": "Normal", "overweight": "Overweight", "obese": "Obese"},
-            "French": {"underweight": "Sous-poids", "normal": "Normal", "overweight": "Surpoids", "obese": "Obèse"},
-            "Korean": {"underweight": "저체중", "normal": "정상", "overweight": "과체중", "obese": "비만"},
-            "Mandarin": {"underweight": "体重不足", "normal": "正常", "overweight": "超重", "obese": "肥胖"},
-            "Spanish": {"underweight": "Bajo peso", "normal": "Normal", "overweight": "Sobrepeso", "obese": "Obeso"}
-        }
-        
-        if bmi < 18.5:
-            status = bmi_status[st.session_state["language"]]["underweight"]
-            color = "🔵"
-        elif bmi < 25:
-            status = bmi_status[st.session_state["language"]]["normal"]
-            color = "🟢"
-        elif bmi < 30:
-            status = bmi_status[st.session_state["language"]]["overweight"]
-            color = "🟡"
-        else:
-            status = bmi_status[st.session_state["language"]]["obese"]
-            color = "🔴"
-        
-        st.success(f"BMI: {bmi:.1f} ({status}) {color}")
-    
-    st.markdown("---")
     
     # Equipment Management
     st.markdown(f"### 🏋️‍♀️ {get_text('equipment_management')}")

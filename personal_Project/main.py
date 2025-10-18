@@ -69,6 +69,7 @@ TRANSLATIONS = {
         "exercise_experience": "Exercise Experience",
         "exercise_frequency": "Exercise Frequency",
         "fitness_level": "Fitness Level",
+        "sports": "Sports/Activities",
         "calculate_calories": "Calculate Calories",
         "maintenance_calories": "Maintenance Calories",
         "bmr": "BMR (Basal Metabolic Rate)",
@@ -111,6 +112,7 @@ TRANSLATIONS = {
         "exercise_experience": "Expérience d'Exercice",
         "exercise_frequency": "Fréquence d'Exercice",
         "fitness_level": "Niveau de Forme",
+        "sports": "Sports/Activités",
         "calculate_calories": "Calculer les Calories",
         "maintenance_calories": "Calories de Maintien",
         "bmr": "BMR (Métabolisme de Base)",
@@ -153,6 +155,7 @@ TRANSLATIONS = {
         "exercise_experience": "운동 경력",
         "exercise_frequency": "운동 횟수",
         "fitness_level": "체력수준",
+        "sports": "운동/활동",
         "calculate_calories": "칼로리 계산",
         "maintenance_calories": "유지 칼로리",
         "bmr": "기초대사량",
@@ -195,6 +198,7 @@ TRANSLATIONS = {
         "exercise_experience": "运动经验",
         "exercise_frequency": "运动频率",
         "fitness_level": "健身水平",
+        "sports": "运动/活动",
         "calculate_calories": "计算卡路里",
         "maintenance_calories": "维持卡路里",
         "bmr": "基础代谢率",
@@ -237,6 +241,7 @@ TRANSLATIONS = {
         "exercise_experience": "Experiencia de Ejercicio",
         "exercise_frequency": "Frecuencia de Ejercicio",
         "fitness_level": "Nivel de Fitness",
+        "sports": "Deportes/Actividades",
         "calculate_calories": "Calcular Calorías",
         "maintenance_calories": "Calorías de Mantenimiento",
         "bmr": "TMB (Tasa Metabólica Basal)",
@@ -431,7 +436,7 @@ def get_ai_response(question, prompt_type):
     
     # Language-specific system prompts (controlled from backend)
     system_prompts = {
-        "English": f"You are MyGymBro's AI workout planner for students. Your PRIMARY function is to create detailed, practical workout routines using ONLY the available gym equipment. Focus on creating complete workout plans with specific exercises, sets, reps, and rest periods.\n\nAvailable gym equipment:\n{equipment_info}\n\nWhen creating workout routines:\n- Use ONLY the equipment listed above\n- Provide specific sets, reps, and rest periods\n- Include proper warm-up and cool-down\n- Consider the user's fitness level and experience\n- Make routines practical for students with limited time\n- Explain proper form for each exercise\n- Suggest weight ranges based on available equipment\n\nFor weekly workout splits:\n- Plan out each day of the week (Monday-Sunday)\n- Include rest days for recovery\n- Balance muscle groups throughout the week\n- Consider the user's exercise frequency\n- Provide progression recommendations\n- Include variety to prevent boredom\n\nYou can also provide basic nutrition advice and calorie calculations when asked. Respond in English.",
+        "English": f"You are MyGymBro's AI workout planner for students. Your PRIMARY function is to create detailed, practical workout routines using ONLY the available gym equipment. Focus on creating complete workout plans with specific exercises, sets, reps, and rest periods.\n\nAvailable gym equipment:\n{equipment_info}\n\nWhen creating workout routines:\n- Use ONLY the equipment listed above\n- Provide specific sets, reps, and rest periods\n- Include proper warm-up and cool-down\n- Consider the user's fitness level and experience\n- Make routines practical for students with limited time\n- Explain proper form for each exercise\n- Suggest weight ranges based on available equipment\n\nFor weekly workout splits:\n- Plan out each day of the week (Monday-Sunday)\n- Include rest days for recovery\n- Balance muscle groups throughout the week\n- Consider the user's exercise frequency\n- Provide progression recommendations\n- Include variety to prevent boredom\n\nFor sports-specific training:\n- Consider the user's sports/activities when creating workouts\n- Include sport-specific exercises and movements\n- Balance gym training with sport performance\n- Focus on injury prevention for their specific sports\n- Suggest complementary exercises that enhance sport performance\n\nYou can also provide basic nutrition advice and calorie calculations when asked. Respond in English.",
         "French": f"Vous êtes le planificateur d'entraînements IA de MyGymBro pour les étudiants. Votre FONCTION PRINCIPALE est de créer des routines d'entraînement détaillées et pratiques en utilisant UNIQUEMENT l'équipement de gym disponible. Concentrez-vous sur la création de plans d'entraînement complets avec des exercices spécifiques, des séries, des répétitions et des périodes de repos.\n\nÉquipement de gym disponible:\n{equipment_info}\n\nLors de la création de routines d'entraînement:\n- Utilisez UNIQUEMENT l'équipement listé ci-dessus\n- Fournissez des séries, répétitions et périodes de repos spécifiques\n- Incluez un échauffement et une récupération appropriés\n- Considérez le niveau de forme et l'expérience de l'utilisateur\n- Rendez les routines pratiques pour les étudiants avec un temps limité\n- Expliquez la forme appropriée pour chaque exercice\n- Suggérez des plages de poids basées sur l'équipement disponible\n\nPour les splits d'entraînement hebdomadaires:\n- Planifiez chaque jour de la semaine (lundi-dimanche)\n- Incluez des jours de repos pour la récupération\n- Équilibrez les groupes musculaires tout au long de la semaine\n- Considérez la fréquence d'exercice de l'utilisateur\n- Fournissez des recommandations de progression\n- Incluez de la variété pour éviter l'ennui\n\nVous pouvez aussi fournir des conseils nutritionnels de base et des calculs de calories quand demandé. Répondez en français.",
         "Korean": f"당신은 MyGymBro의 학생용 AI 운동 계획자입니다. 당신의 주요 기능은 사용 가능한 짐 기구만을 사용하여 상세하고 실용적인 운동 루틴을 만드는 것입니다. 구체적인 운동, 세트, 반복 횟수, 휴식 시간이 포함된 완전한 운동 계획을 만드는 데 집중하세요.\n\n사용 가능한 짐 기구:\n{equipment_info}\n\n운동 루틴을 만들 때:\n- 위에 나열된 기구만 사용하세요\n- 구체적인 세트, 반복 횟수, 휴식 시간을 제공하세요\n- 적절한 워밍업과 쿨다운을 포함하세요\n- 사용자의 체력 수준과 경험을 고려하세요\n- 시간이 제한된 학생들에게 실용적인 루틴을 만드세요\n- 각 운동의 올바른 자세를 설명하세요\n- 사용 가능한 기구를 바탕으로 무게 범위를 제안하세요\n\n요청받을 때 기본적인 영양 조언과 칼로리 계산도 제공할 수 있습니다. 한국어로 답변해주세요.",
         "Mandarin": f"你是MyGymBro的学生AI健身计划制定者。你的主要功能是仅使用可用的健身房设备创建详细、实用的锻炼计划。专注于创建包含具体练习、组数、次数和休息时间的完整锻炼计划。\n\n可用健身房设备：\n{equipment_info}\n\n制定锻炼计划时：\n- 仅使用上述列出的设备\n- 提供具体的组数、次数和休息时间\n- 包括适当的热身和冷却\n- 考虑用户的健身水平和经验\n- 为时间有限的学生制定实用的计划\n- 解释每个练习的正确姿势\n- 根据可用设备建议重量范围\n\n被询问时也可以提供基本营养建议和卡路里计算。请用中文回答。",
@@ -543,6 +548,21 @@ with col4:
         key="main_fitness"
     )
 
+# Sports/Activities section
+sports_activities = st.multiselect(
+    get_text("sports"),
+    [
+        "Basketball", "Soccer", "Tennis", "Swimming", "Running", "Cycling", 
+        "Volleyball", "Baseball", "Football", "Hockey", "Track & Field", 
+        "Wrestling", "Boxing", "Martial Arts", "Dance", "Yoga", "Pilates",
+        "Rock Climbing", "Gymnastics", "Lacrosse", "Rugby", "Golf", 
+        "Badminton", "Table Tennis", "Skiing", "Snowboarding", "Surfing",
+        "None - Just gym workouts", "Other"
+    ],
+    key="main_sports",
+    help="Select all sports or activities you participate in regularly"
+)
+
 st.markdown("---")
 
 # Main workout plan generator
@@ -554,45 +574,54 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     if st.button("💪 Full Body Workout", use_container_width=True):
-        st.session_state["pre_filled_question"] = f"Create a full body workout routine for me using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}. Focus on compound movements and include proper warm-up and cool-down."
+        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+        st.session_state["pre_filled_question"] = f"Create a full body workout routine for me using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Focus on compound movements and include proper warm-up and cool-down."
 
 with col2:
     if st.button("🔥 Upper Body Focus", use_container_width=True):
-        st.session_state["pre_filled_question"] = f"Create an upper body focused workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}. Include chest, back, shoulders, and arms exercises."
+        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+        st.session_state["pre_filled_question"] = f"Create an upper body focused workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Include chest, back, shoulders, and arms exercises."
 
 with col3:
     if st.button("🦵 Lower Body Focus", use_container_width=True):
-        st.session_state["pre_filled_question"] = f"Create a lower body focused workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}. Include legs, glutes, and core exercises."
+        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+        st.session_state["pre_filled_question"] = f"Create a lower body focused workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Include legs, glutes, and core exercises."
 
 # Additional workout options
 col4, col5, col6 = st.columns(3)
 
 with col4:
     if st.button("📅 Full Weekly Split", use_container_width=True):
-        st.session_state["pre_filled_question"] = f"Create a complete weekly workout split for me using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}. Plan out each day of the week with specific exercises, sets, reps, and rest days. Make it a balanced program that targets all muscle groups throughout the week."
+        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+        st.session_state["pre_filled_question"] = f"Create a complete weekly workout split for me using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Plan out each day of the week with specific exercises, sets, reps, and rest days. Make it a balanced program that targets all muscle groups throughout the week."
 
 with col5:
     if st.button("⚡ Quick 30-min Workout", use_container_width=True):
-        st.session_state["pre_filled_question"] = f"Create a quick 30-minute workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}. Make it efficient and effective for busy students."
+        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+        st.session_state["pre_filled_question"] = f"Create a quick 30-minute workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Make it efficient and effective for busy students."
 
 with col6:
     if st.button("🏃 Cardio + Strength", use_container_width=True):
-        st.session_state["pre_filled_question"] = f"Create a cardio and strength combined workout using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}. Include both cardio and strength training elements."
+        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+        st.session_state["pre_filled_question"] = f"Create a cardio and strength combined workout using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Include both cardio and strength training elements."
 
 # More workout options
 col7, col8, col9 = st.columns(3)
 
 with col7:
     if st.button("🎯 Beginner-Friendly", use_container_width=True):
-        st.session_state["pre_filled_question"] = f"Create a beginner-friendly workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, beginner fitness level, exercise {exercise_frequency.lower()}. Focus on proper form and progression."
+        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+        st.session_state["pre_filled_question"] = f"Create a beginner-friendly workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, beginner fitness level, exercise {exercise_frequency.lower()}{sports_info}. Focus on proper form and progression."
 
 with col8:
     if st.button("💪 Push/Pull/Legs Split", use_container_width=True):
-        st.session_state["pre_filled_question"] = f"Create a push/pull/legs workout split using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}. Include push day (chest, shoulders, triceps), pull day (back, biceps), and legs day with proper rest between muscle groups."
+        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+        st.session_state["pre_filled_question"] = f"Create a push/pull/legs workout split using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Include push day (chest, shoulders, triceps), pull day (back, biceps), and legs day with proper rest between muscle groups."
 
 with col9:
     if st.button("🔥 High Intensity Training", use_container_width=True):
-        st.session_state["pre_filled_question"] = f"Create a high intensity training (HIT) workout using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}. Focus on maximum effort with shorter rest periods and higher intensity."
+        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+        st.session_state["pre_filled_question"] = f"Create a high intensity training (HIT) workout using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Focus on maximum effort with shorter rest periods and higher intensity."
 
 # Calorie calculator option
 st.markdown("---")

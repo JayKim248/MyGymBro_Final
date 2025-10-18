@@ -60,6 +60,32 @@ TRANSLATIONS = {
         "routine_calculator": "Routine Set Calculator",
         "number_input": "Enter number (1 to n)",
         "calculate": "Calculate",
+        "calorie_calculator": "Calorie Calculator",
+        "gender": "Gender",
+        "age": "Age",
+        "height": "Height (cm)",
+        "weight": "Weight (kg)",
+        "lifestyle": "Lifestyle",
+        "exercise_experience": "Exercise Experience",
+        "exercise_frequency": "Exercise Frequency",
+        "fitness_level": "Fitness Level",
+        "calculate_calories": "Calculate Calories",
+        "maintenance_calories": "Maintenance Calories",
+        "bmr": "BMR (Basal Metabolic Rate)",
+        "activity_metabolism": "Activity Metabolism",
+        "total_metabolism": "Total Metabolism",
+        "daily_intake": "Daily Recommended Intake",
+        "weight_loss": "Weight Loss",
+        "weight_maintenance": "Weight Maintenance",
+        "bulk_up": "Bulk Up",
+        "target_calories": "Target Calories",
+        "macros": "Macronutrients",
+        "carbs": "Carbohydrates",
+        "protein": "Protein",
+        "fat": "Fat",
+        "cardio_intensity": "Recommended Cardio Intensity",
+        "heart_rate_range": "Heart Rate Range",
+        "bpm": "bpm",
         "chat_title": "💬 Chat with MyGymBro",
         "chat_placeholder": "💬 Ask about gym routines or exercises!",
         "loading_message": "🤖 MyGymBro is preparing an answer...",
@@ -76,6 +102,32 @@ TRANSLATIONS = {
         "routine_calculator": "Calculateur de Série de Routine",
         "number_input": "Entrez un nombre (1 à n)",
         "calculate": "Calculer",
+        "calorie_calculator": "Calculateur de Calories",
+        "gender": "Sexe",
+        "age": "Âge",
+        "height": "Taille (cm)",
+        "weight": "Poids (kg)",
+        "lifestyle": "Mode de Vie",
+        "exercise_experience": "Expérience d'Exercice",
+        "exercise_frequency": "Fréquence d'Exercice",
+        "fitness_level": "Niveau de Forme",
+        "calculate_calories": "Calculer les Calories",
+        "maintenance_calories": "Calories de Maintien",
+        "bmr": "BMR (Métabolisme de Base)",
+        "activity_metabolism": "Métabolisme d'Activité",
+        "total_metabolism": "Métabolisme Total",
+        "daily_intake": "Apport Quotidien Recommandé",
+        "weight_loss": "Perte de Poids",
+        "weight_maintenance": "Maintien du Poids",
+        "bulk_up": "Prise de Masse",
+        "target_calories": "Calories Cibles",
+        "macros": "Macronutriments",
+        "carbs": "Glucides",
+        "protein": "Protéines",
+        "fat": "Lipides",
+        "cardio_intensity": "Intensité Cardio Recommandée",
+        "heart_rate_range": "Plage de Fréquence Cardiaque",
+        "bpm": "bpm",
         "chat_title": "💬 Discutez avec MyGymBro",
         "chat_placeholder": "💬 Posez des questions sur les routines de gym ou exercices!",
         "loading_message": "🤖 MyGymBro prépare une réponse...",
@@ -92,6 +144,32 @@ TRANSLATIONS = {
         "routine_calculator": "루틴 세트 계산기",
         "number_input": "숫자 입력 (1부터 n까지)",
         "calculate": "계산하기",
+        "calorie_calculator": "칼로리 계산기",
+        "gender": "성별",
+        "age": "나이",
+        "height": "키 (cm)",
+        "weight": "몸무게 (kg)",
+        "lifestyle": "생활습관",
+        "exercise_experience": "운동 경력",
+        "exercise_frequency": "운동 횟수",
+        "fitness_level": "체력수준",
+        "calculate_calories": "칼로리 계산",
+        "maintenance_calories": "유지 칼로리",
+        "bmr": "기초대사량",
+        "activity_metabolism": "활동 대사량",
+        "total_metabolism": "총 대사량",
+        "daily_intake": "하루 권장 섭취량",
+        "weight_loss": "체중 감소",
+        "weight_maintenance": "체중 유지",
+        "bulk_up": "벌크업",
+        "target_calories": "목표 섭취 칼로리",
+        "macros": "탄단지 매크로",
+        "carbs": "탄수화물",
+        "protein": "단백질",
+        "fat": "지방",
+        "cardio_intensity": "권장 유산소 강도",
+        "heart_rate_range": "추천 심박수 범위",
+        "bpm": "bpm",
         "chat_title": "💬 MyGymBro와 대화하기",
         "chat_placeholder": "💬 짐 루틴이나 운동에 대해 궁금한 것을 물어보세요!",
         "loading_message": "🤖 MyGymBro가 답변을 준비하고 있습니다...",
@@ -108,6 +186,32 @@ TRANSLATIONS = {
         "routine_calculator": "计划组计算器",
         "number_input": "输入数字（1到n）",
         "calculate": "计算",
+        "calorie_calculator": "卡路里计算器",
+        "gender": "性别",
+        "age": "年龄",
+        "height": "身高（厘米）",
+        "weight": "体重（公斤）",
+        "lifestyle": "生活方式",
+        "exercise_experience": "运动经验",
+        "exercise_frequency": "运动频率",
+        "fitness_level": "健身水平",
+        "calculate_calories": "计算卡路里",
+        "maintenance_calories": "维持卡路里",
+        "bmr": "基础代谢率",
+        "activity_metabolism": "活动代谢",
+        "total_metabolism": "总代谢",
+        "daily_intake": "每日推荐摄入量",
+        "weight_loss": "减重",
+        "weight_maintenance": "维持体重",
+        "bulk_up": "增肌",
+        "target_calories": "目标卡路里",
+        "macros": "宏量营养素",
+        "carbs": "碳水化合物",
+        "protein": "蛋白质",
+        "fat": "脂肪",
+        "cardio_intensity": "推荐有氧强度",
+        "heart_rate_range": "推荐心率范围",
+        "bpm": "bpm",
         "chat_title": "💬 与MyGymBro聊天",
         "chat_placeholder": "💬 询问健身计划或运动相关问题！",
         "loading_message": "🤖 MyGymBro正在准备答案...",
@@ -124,6 +228,32 @@ TRANSLATIONS = {
         "routine_calculator": "Calculadora de Series de Rutina",
         "number_input": "Ingrese número (1 a n)",
         "calculate": "Calcular",
+        "calorie_calculator": "Calculadora de Calorías",
+        "gender": "Género",
+        "age": "Edad",
+        "height": "Altura (cm)",
+        "weight": "Peso (kg)",
+        "lifestyle": "Estilo de Vida",
+        "exercise_experience": "Experiencia de Ejercicio",
+        "exercise_frequency": "Frecuencia de Ejercicio",
+        "fitness_level": "Nivel de Fitness",
+        "calculate_calories": "Calcular Calorías",
+        "maintenance_calories": "Calorías de Mantenimiento",
+        "bmr": "TMB (Tasa Metabólica Basal)",
+        "activity_metabolism": "Metabolismo de Actividad",
+        "total_metabolism": "Metabolismo Total",
+        "daily_intake": "Ingesta Diaria Recomendada",
+        "weight_loss": "Pérdida de Peso",
+        "weight_maintenance": "Mantenimiento de Peso",
+        "bulk_up": "Aumento de Masa",
+        "target_calories": "Calorías Objetivo",
+        "macros": "Macronutrientes",
+        "carbs": "Carbohidratos",
+        "protein": "Proteína",
+        "fat": "Grasa",
+        "cardio_intensity": "Intensidad Cardio Recomendada",
+        "heart_rate_range": "Rango de Frecuencia Cardíaca",
+        "bpm": "lpm",
         "chat_title": "💬 Chatea con MyGymBro",
         "chat_placeholder": "💬 ¡Pregunta sobre rutinas de gimnasio o ejercicios!",
         "loading_message": "🤖 MyGymBro está preparando una respuesta...",
@@ -190,6 +320,96 @@ def calculate_weird_numbers(n):
     for i in range(1, n + 1):
         result += weird(i)
     return result
+
+# Calorie calculation functions
+def calculate_bmr(gender, age, height, weight):
+    """Calculate Basal Metabolic Rate using Harris-Benedict equation."""
+    if gender == "Male":
+        bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
+    else:  # Female
+        bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
+    return round(bmr, 1)
+
+def calculate_activity_multiplier(lifestyle, exercise_frequency, fitness_level):
+    """Calculate activity multiplier based on lifestyle and exercise habits."""
+    base_multipliers = {
+        "Lying down 15+ hours": 1.0,
+        "Almost no movement at home": 1.1,
+        "Student or office worker": 1.2,
+        "Active": 1.3,
+        "Very active": 1.4
+    }
+    
+    exercise_bonus = {
+        "None": 0,
+        "1x/week": 0.05,
+        "2x/week": 0.1,
+        "3x/week": 0.15,
+        "4x/week": 0.2,
+        "5x/week": 0.25,
+        "6x/week": 0.3,
+        "7x/week": 0.35
+    }
+    
+    fitness_bonus = {
+        "Very poor": 0,
+        "Poor": 0.02,
+        "Below average": 0.05,
+        "Average": 0.08,
+        "Above average": 0.12,
+        "Good": 0.15,
+        "Very good": 0.2
+    }
+    
+    base = base_multipliers.get(lifestyle, 1.2)
+    exercise = exercise_bonus.get(exercise_frequency, 0)
+    fitness = fitness_bonus.get(fitness_level, 0)
+    
+    return base + exercise + fitness
+
+def calculate_macros(calories, goal="maintenance"):
+    """Calculate macronutrient distribution."""
+    if goal == "weight_loss":
+        calories = calories - 500
+    elif goal == "bulk_up":
+        calories = calories + 500
+    
+    # 5:3:2 ratio (carbs:protein:fat)
+    protein_calories = calories * 0.3
+    carb_calories = calories * 0.5
+    fat_calories = calories * 0.2
+    
+    protein_grams = round(protein_calories / 4, 1)
+    carb_grams = round(carb_calories / 4, 1)
+    fat_grams = round(fat_calories / 9, 1)
+    
+    return {
+        "calories": calories,
+        "protein": protein_grams,
+        "carbs": carb_grams,
+        "fat": fat_grams
+    }
+
+def calculate_heart_rate_range(age, fitness_level):
+    """Calculate recommended heart rate range for fat burning."""
+    max_hr = 220 - age
+    
+    # MFO (Maximal Fat Oxidation) zones based on fitness level
+    zones = {
+        "Very poor": (0.5, 0.6),
+        "Poor": (0.55, 0.65),
+        "Below average": (0.6, 0.7),
+        "Average": (0.65, 0.75),
+        "Above average": (0.7, 0.8),
+        "Good": (0.75, 0.85),
+        "Very good": (0.8, 0.9)
+    }
+    
+    min_zone, max_zone = zones.get(fitness_level, (0.65, 0.75))
+    min_hr = int(max_hr * min_zone)
+    max_hr = int(max_hr * max_zone)
+    
+    return min_hr, max_hr
 
 # AI response function
 def get_ai_response(question, prompt_type):
@@ -267,6 +487,89 @@ with st.sidebar:
     
     # Set default prompt mode (controlled from backend)
     selected_prompt = "Basic Mode"  # Default mode, can be changed in backend
+    
+    # Calorie Calculator
+    st.markdown(f"### 🔥 {get_text('calorie_calculator')}")
+    
+    # Input fields
+    col1, col2 = st.columns(2)
+    with col1:
+        gender = st.selectbox(get_text("gender"), ["Male", "Female"])
+        age = st.number_input(get_text("age"), min_value=10, max_value=100, value=20)
+    with col2:
+        height = st.number_input(get_text("height"), min_value=100, max_value=250, value=170)
+        weight = st.number_input(get_text("weight"), min_value=30, max_value=200, value=70)
+    
+    lifestyle = st.selectbox(
+        get_text("lifestyle"),
+        ["Lying down 15+ hours", "Almost no movement at home", "Student or office worker", "Active", "Very active"]
+    )
+    
+    col3, col4 = st.columns(2)
+    with col3:
+        exercise_experience = st.selectbox(
+            get_text("exercise_experience"),
+            ["Beginner", "1-3 years", "3-5 years intermediate", "5+ years advanced", "10+ years expert"]
+        )
+        exercise_frequency = st.selectbox(
+            get_text("exercise_frequency"),
+            ["None", "1x/week", "2x/week", "3x/week", "4x/week", "5x/week", "6x/week", "7x/week"]
+        )
+    with col4:
+        fitness_level = st.selectbox(
+            get_text("fitness_level"),
+            ["Very poor", "Poor", "Below average", "Average", "Above average", "Good", "Very good"]
+        )
+    
+    if st.button(f"🔥 {get_text('calculate_calories')}", use_container_width=True):
+        # Calculate BMR
+        bmr = calculate_bmr(gender, age, height, weight)
+        
+        # Calculate activity multiplier
+        activity_multiplier = calculate_activity_multiplier(lifestyle, exercise_frequency, fitness_level)
+        
+        # Calculate total metabolism
+        activity_metabolism = round(bmr * (activity_multiplier - 1), 1)
+        total_metabolism = round(bmr * activity_multiplier, 1)
+        
+        # Display results
+        st.markdown("### 📊 " + get_text("maintenance_calories"))
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric(get_text("bmr"), f"{bmr} kcal")
+        with col2:
+            st.metric(get_text("activity_metabolism"), f"{activity_metabolism} kcal")
+        with col3:
+            st.metric(get_text("total_metabolism"), f"{total_metabolism} kcal")
+        
+        # Goal selection
+        st.markdown("### 🎯 " + get_text("daily_intake"))
+        goal = st.radio("Select your goal:", ["weight_loss", "weight_maintenance", "bulk_up"], 
+                       format_func=lambda x: get_text(x))
+        
+        # Calculate macros
+        macros = calculate_macros(total_metabolism, goal)
+        
+        st.markdown(f"**{get_text('target_calories')}:** {macros['calories']} kcal")
+        
+        # Macronutrients
+        st.markdown("### 🥗 " + get_text("macros"))
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric(get_text("carbs"), f"{macros['carbs']}g")
+        with col2:
+            st.metric(get_text("protein"), f"{macros['protein']}g")
+        with col3:
+            st.metric(get_text("fat"), f"{macros['fat']}g")
+        
+        # Heart rate range
+        min_hr, max_hr = calculate_heart_rate_range(age, fitness_level)
+        st.markdown("### ❤️ " + get_text("cardio_intensity"))
+        st.markdown(f"**{get_text('heart_rate_range')}:** {min_hr} - {max_hr} {get_text('bpm')}")
+        st.info("💡 This is the optimal heart rate range for fat burning during cardio!")
+    
+    st.markdown("---")
     
     # Weird number calculator
     st.markdown(f"**{get_text('routine_calculator')}**")

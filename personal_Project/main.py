@@ -525,7 +525,7 @@ sports_activities = st.multiselect(
         "Wrestling", "Boxing", "Martial Arts", "Dance", "Yoga", "Pilates",
         "Rock Climbing", "Gymnastics", "Lacrosse", "Rugby", "Golf", 
         "Badminton", "Table Tennis", "Skiing", "Snowboarding", "Surfing",
-        "None - Just gym workouts", "Other"
+        "Rowing", "Erg", "None - Just gym workouts", "Other"
     ],
     key="main_sports",
     help="Select all sports or activities you participate in regularly"

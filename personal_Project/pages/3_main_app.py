@@ -455,13 +455,17 @@ def get_ai_response(question, prompt_type):
 # Check authentication
 check_authentication()
 
+# Get user data from session state
+user_data = st.session_state.get("user_data", {})
+
 # Main UI
 st.markdown(f'<h1 class="main-header">💪 {get_text("app_title")}</h1>', unsafe_allow_html=True)
 
-# Welcome message
+# Welcome message with user's first name
+user_first_name = user_data.get("first_name", "there")
 st.markdown(f"""
 <div class="fitness-card">
-    <h3>🎓 {get_text("welcome")}</h3>
+    <h3>🎓 Welcome, {user_first_name}!</h3>
     <p>{get_text("subtitle")}</p>
 </div>
 """, unsafe_allow_html=True)
@@ -510,8 +514,7 @@ with st.sidebar:
     
     
 
-# Get user data from session state
-user_data = st.session_state.get("user_data", {})
+# Get additional user data for workout generation
 age = user_data.get("age", 20)
 gender = user_data.get("gender", "Male")
 fitness_level = user_data.get("fitness_level", "Average")

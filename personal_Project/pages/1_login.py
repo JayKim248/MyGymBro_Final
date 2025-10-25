@@ -169,3 +169,87 @@ st.markdown(
     """, 
     unsafe_allow_html=True
 )
+
+# Toronto Blue Jays logo - Clickable for auto-login
+st.markdown("---")
+st.markdown("### 🏟️ Toronto Blue Jays")
+
+# Create a clickable Blue Jays section
+if st.button(
+    """
+    🐦
+    
+    TORONTO
+    BLUE JAYS
+    
+    ⚾ MLB Team
+    
+    Click to login as Blue Jays fan
+    """,
+    use_container_width=True,
+    help="Click to automatically login with Blue Jays fan profile"
+):
+    # Create Blue Jays fan user data
+    blue_jays_user_data = {
+        "email": "bluejays.fan@mygymbro.com",
+        "password": hash_password("bluejays2024"),
+        "first_name": "Blue Jays",
+        "last_name": "Fan",
+        "age": 16,
+        "gender": "Male",
+        "fitness_level": "Advanced",
+        "height_cm": 175,  # 5'9"
+        "height_feet": 5,
+        "height_inches": 9,
+        "weight_kg": 70,   # ~154 lbs
+        "weight_lbs": 154,
+        "lifestyle": "Active",
+        "exercise_experience": "3-5 years intermediate",
+        "exercise_frequency": "5x/week",
+        "sports_activities": ["Baseball"],
+        "created_at": datetime.now().isoformat(),
+        "last_login": None,
+        "workout_history": [],
+        "preferences": {
+            "language": "English",
+            "notifications": True,
+            "theme": "light"
+        }
+    }
+    
+    # Save the Blue Jays user to the users file
+    users = load_users()
+    users["bluejays.fan@mygymbro.com"] = blue_jays_user_data
+    save_users(users)
+    
+    # Log in the Blue Jays fan
+    st.session_state["authenticated"] = True
+    st.session_state["user_email"] = "bluejays.fan@mygymbro.com"
+    st.session_state["user_data"] = blue_jays_user_data
+    
+    st.success("🏟️ Welcome, Blue Jays Fan! Logging you in...")
+    st.balloons()
+    st.switch_page("pages/3_main_app.py")
+
+# Style the button to look like the Blue Jays logo
+st.markdown("""
+<style>
+    .stButton > button {
+        background: linear-gradient(135deg, #1E3A8A, #DC2626) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 15px !important;
+        padding: 2rem 1rem !important;
+        font-weight: bold !important;
+        font-size: 1.1rem !important;
+        text-align: center !important;
+        line-height: 1.4 !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+        transition: transform 0.2s !important;
+    }
+    .stButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.3) !important;
+    }
+</style>
+""", unsafe_allow_html=True)

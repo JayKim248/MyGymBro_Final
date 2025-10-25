@@ -172,17 +172,23 @@ st.markdown(
 
 # Toronto Blue Jays logo - Clickable for auto-login
 st.markdown("---")
-st.markdown("### 🏟️ Toronto Blue Jays")
+st.markdown("### Toronto Blue Jays")
+
+# Display Blue Jays logo
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    try:
+        st.image("Images/Toronto_Blue_Jays_Logo.jpg", width=200)
+    except:
+        st.markdown("**TORONTO BLUE JAYS**")
 
 # Create a clickable Blue Jays section
 if st.button(
     """
-    🐦
-    
     TORONTO
     BLUE JAYS
     
-    ⚾ MLB Team
+    MLB Team
     
     Click to login as Blue Jays fan
     """,
@@ -227,11 +233,77 @@ if st.button(
     st.session_state["user_email"] = "bluejays.fan@mygymbro.com"
     st.session_state["user_data"] = blue_jays_user_data
     
-    st.success("🏟️ Welcome, Blue Jays Fan! Logging you in...")
+    st.success("Welcome, Blue Jays Fan! Logging you in...")
     st.balloons()
     st.switch_page("pages/3_main_app.py")
 
-# Style the button to look like the Blue Jays logo
+# Clash Royale section
+st.markdown("---")
+st.markdown("### Clash Royale")
+
+# Display Clash Royale logo
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    try:
+        st.image("Images/Clash_Royale_Logo.png", width=200)
+    except:
+        st.markdown("**CLASH ROYALE**")
+
+# Create a clickable Clash Royale section
+if st.button(
+    """
+    CLASH ROYALE
+    
+    Mobile Game
+    
+    Click to login as Clash Royale player
+    """,
+    use_container_width=True,
+    help="Click to automatically login with Clash Royale player profile"
+):
+    # Create Clash Royale player user data
+    clash_royale_user_data = {
+        "email": "clashroyale.player@mygymbro.com",
+        "password": hash_password("clashroyale2024"),
+        "first_name": "Clash",
+        "last_name": "Royale",
+        "age": 18,
+        "gender": "Male",
+        "fitness_level": "Intermediate",
+        "height_cm": 180,  # 5'11"
+        "height_feet": 5,
+        "height_inches": 11,
+        "weight_kg": 75,   # ~165 lbs
+        "weight_lbs": 165,
+        "lifestyle": "Student or office worker",
+        "exercise_experience": "1-2 years beginner",
+        "exercise_frequency": "3x/week",
+        "sports_activities": ["Gaming"],
+        "created_at": datetime.now().isoformat(),
+        "last_login": None,
+        "workout_history": [],
+        "preferences": {
+            "language": "English",
+            "notifications": True,
+            "theme": "light"
+        }
+    }
+    
+    # Save the Clash Royale user to the users file
+    users = load_users()
+    users["clashroyale.player@mygymbro.com"] = clash_royale_user_data
+    save_users(users)
+    
+    # Log in the Clash Royale player
+    st.session_state["authenticated"] = True
+    st.session_state["user_email"] = "clashroyale.player@mygymbro.com"
+    st.session_state["user_data"] = clash_royale_user_data
+    
+    st.success("Welcome, Clash Royale Player! Logging you in...")
+    st.balloons()
+    st.switch_page("pages/3_main_app.py")
+
+# Style the buttons to look like the team/game logos
 st.markdown("""
 <style>
     .stButton > button {
@@ -250,6 +322,12 @@ st.markdown("""
     .stButton > button:hover {
         transform: translateY(-2px) !important;
         box-shadow: 0 6px 12px rgba(0,0,0,0.3) !important;
+    }
+    
+    /* Clash Royale button styling */
+    .stButton:nth-of-type(2) > button {
+        background: linear-gradient(135deg, #FFD700, #FF6B35) !important;
+        color: #1a1a1a !important;
     }
 </style>
 """, unsafe_allow_html=True)

@@ -17,7 +17,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
+# Custom CSS and JavaScript for auto-scroll
 st.markdown("""
 <style>
     .main-header {
@@ -36,7 +36,76 @@ st.markdown("""
         margin: 0.5rem 0;
         border-left: 4px solid #ff6b6b;
     }
+    .chat-container {
+        scroll-behavior: smooth;
+    }
+    .stChatMessage {
+        margin-bottom: 1rem;
+    }
 </style>
+
+<script>
+    // Enhanced auto-scroll function
+    function scrollToBottom() {
+        // Multiple attempts with different strategies
+        setTimeout(() => {
+            // Strategy 1: Scroll to the last chat message
+            const chatMessages = document.querySelectorAll('[data-testid="stChatMessage"]');
+            if (chatMessages.length > 0) {
+                chatMessages[chatMessages.length - 1].scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'end' 
+                });
+                return;
+            }
+            
+            // Strategy 2: Scroll to chat input
+            const chatInput = document.querySelector('[data-testid="stChatInput"]');
+            if (chatInput) {
+                chatInput.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+                return;
+            }
+            
+            // Strategy 3: Scroll to bottom of page
+            window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: 'smooth'
+            });
+        }, 200);
+    }
+    
+    // Function to scroll to chat input
+    function scrollToChatInput() {
+        setTimeout(() => {
+            const chatInput = document.querySelector('[data-testid="stChatInput"]');
+            if (chatInput) {
+                chatInput.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+            } else {
+                scrollToBottom();
+            }
+        }, 100);
+    }
+    
+    // Auto-scroll on page load
+    window.addEventListener('load', scrollToBottom);
+    
+    // Auto-scroll when Streamlit reruns
+    window.addEventListener('message', function(event) {
+        if (event.data && event.data.type === 'streamlit:rerun') {
+            setTimeout(scrollToBottom, 300);
+        }
+    });
+    
+    // Make functions globally available
+    window.scrollToBottom = scrollToBottom;
+    window.scrollToChatInput = scrollToChatInput;
+</script>
 """, unsafe_allow_html=True)
 
 # Initialize session state
@@ -49,7 +118,11 @@ if "authenticated" not in st.session_state:
 if "user_email" not in st.session_state:
     st.session_state["user_email"] = None
 if "user_data" not in st.session_state:
-    st.session_state["user_data"] = None
+    st.session_state["user_data"] = {}
+if "last_message_count" not in st.session_state:
+    st.session_state["last_message_count"] = 0
+if "should_scroll" not in st.session_state:
+    st.session_state["should_scroll"] = False
 
 # Data directory setup
 DATA_DIR = Path("data")
@@ -269,7 +342,7 @@ def logout_user():
     """Logout user and clear session state."""
     st.session_state["authenticated"] = False
     st.session_state["user_email"] = None
-    st.session_state["user_data"] = None
+    st.session_state["user_data"] = {}
     st.session_state["messages"] = []
     st.rerun()
 
@@ -456,7 +529,7 @@ def get_ai_response(question, prompt_type):
 check_authentication()
 
 # Get user data from session state
-user_data = st.session_state.get("user_data", {})
+user_data = st.session_state.get("user_data", {}) or {}
 
 # Main UI
 st.markdown(f'<h1 class="main-header">💪 {get_text("app_title")}</h1>', unsafe_allow_html=True)
@@ -579,6 +652,87 @@ with col9:
         sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
         st.session_state["pre_filled_question"] = f"Create a high intensity training (HIT) workout using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Focus on maximum effort with shorter rest periods and higher intensity."
 
+# Funny workout options
+st.markdown("---")
+st.markdown("### 😂 Fun & Meme Workouts")
+st.markdown("*Because fitness should be fun!*")
+
+col10, col11, col12 = st.columns(3)
+
+with col10:
+    if st.button("😭 Man United Fan Workout", use_container_width=True):
+        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+        st.session_state["pre_filled_question"] = f"Create a funny workout routine for a Manchester United fan who's been crying all day about their team's performance. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Make it therapeutic and include exercises that help with emotional stress relief, like heavy lifting to channel frustration, cardio to sweat out the tears, and maybe some yoga for inner peace. Add some humor and motivation!"
+
+with col11:
+    if st.button("👑 Clash Royale Rage Workout", use_container_width=True):
+        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+        st.session_state["pre_filled_question"] = f"Create a workout routine for someone who gets mad at MegaKnight in Clash Royale. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Include explosive movements to channel the rage, cardio to burn off the frustration, and strength training to feel powerful. Make it fun and include some gaming references!"
+
+with col12:
+    if st.button("🎮 Gamer's Revenge Workout", use_container_width=True):
+        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+        st.session_state["pre_filled_question"] = f"Create a workout for a gamer who needs to get revenge on their opponents. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Focus on building strength and endurance to dominate in both real life and gaming. Include exercises that improve hand-eye coordination and reaction time!"
+
+# More funny options
+col13, col14, col15 = st.columns(3)
+
+with col13:
+    if st.button("🍕 Pizza Recovery Workout", use_container_width=True):
+        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+        st.session_state["pre_filled_question"] = f"Create a workout routine for someone who ate too much pizza and needs to burn it off. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Focus on cardio and core exercises to work off those extra calories, but make it fun and not too intense since I'm probably feeling sluggish!"
+
+with col14:
+    if st.button("😴 Lazy Day Motivation", use_container_width=True):
+        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+        st.session_state["pre_filled_question"] = f"Create a gentle but effective workout for someone having a lazy day but still wants to move. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Make it easy to start but progressively engaging, with lots of motivation and encouragement!"
+
+with col15:
+    if st.button("🎯 Procrastination Fighter", use_container_width=True):
+        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+        st.session_state["pre_filled_question"] = f"Create a workout routine for someone who's procrastinating on their studies/work and needs to get moving. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Make it energizing and motivating, with exercises that help clear the mind and boost productivity!"
+
+# Clash Royale themed workouts (only for Clash Royale players)
+if st.session_state.get("user_email") == "clashroyale.player@mygymbro.com":
+    st.markdown("---")
+    st.markdown("### 👑 Clash Royale Themed Workouts")
+    st.markdown("*Channel your favorite Clash Royale characters!*")
+    
+    col16, col17, col18 = st.columns(3)
+    
+    with col16:
+        if st.button("🛡️ MegaKnight's Rage Workout", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create a MegaKnight-themed workout routine! I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. MegaKnight is all about explosive power and heavy hits, so include exercises that build explosive strength, heavy lifting, and powerful movements. Think jumping exercises, heavy squats, and explosive push-ups. Make it intense and rage-filled like when MegaKnight drops on your troops!"
+    
+    with col17:
+        if st.button("⚔️ P.E.K.K.A.'s Armor Workout", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create a P.E.K.K.A.-themed workout routine! I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. P.E.K.K.A. is the ultimate tank with heavy armor, so focus on building massive strength, endurance, and that tank-like physique. Include heavy compound movements, long sets, and exercises that make you feel like an unstoppable armored warrior. Think deadlifts, heavy presses, and endurance challenges!"
+    
+    with col18:
+        if st.button("👑 King's Royal Workout", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create a King-themed workout routine! I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. The King is the leader of the arena, so this should be a royal, comprehensive workout that covers all aspects of fitness. Include exercises that build strength, agility, and royal presence. Think full-body movements, balance exercises, and workouts that make you feel like the ruler of the gym!"
+    
+    # More Clash Royale themed workouts
+    col19, col20, col21 = st.columns(3)
+    
+    with col19:
+        if st.button("🏹 Archer Queen's Precision", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create an Archer Queen-themed workout routine! I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. The Archer Queen is all about precision, agility, and long-range power. Focus on exercises that improve coordination, balance, and upper body strength. Include exercises that require precision and control, like single-arm movements, balance challenges, and core stability work!"
+    
+    with col20:
+        if st.button("⚡ Sparky's Electric Power", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create a Sparky-themed workout routine! I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Sparky charges up for massive damage, so this workout should focus on explosive power and high-intensity bursts. Include exercises that build explosive strength, like plyometrics, sprint intervals, and exercises that require maximum effort in short bursts. Make it electric and high-energy!"
+    
+    with col21:
+        if st.button("🏰 X-Bow's Tower Defense", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create an X-Bow-themed workout routine! I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. The X-Bow is a defensive building that requires stability and endurance. Focus on exercises that build stability, endurance, and defensive strength. Include isometric holds, endurance exercises, and movements that require sustained effort. Think planks, wall sits, and long-duration exercises!"
+
 # Calorie calculator option
 st.markdown("---")
 st.markdown("### 📊 Additional Tools")
@@ -675,6 +829,38 @@ for message in st.session_state["messages"]:
     with st.chat_message(message["role"]):
         st.write(message["content"])
 
+# Check if we should scroll (after messages are displayed)
+if st.session_state.get("should_scroll", False):
+    st.markdown("""
+    <script>
+        // Enhanced scroll function for new messages
+        function scrollToNewMessage() {
+            setTimeout(() => {
+                // Try multiple strategies
+                const chatMessages = document.querySelectorAll('[data-testid="stChatMessage"]');
+                if (chatMessages.length > 0) {
+                    chatMessages[chatMessages.length - 1].scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'end' 
+                    });
+                } else {
+                    // Fallback to window scroll
+                    window.scrollTo({
+                        top: document.body.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                }
+            }, 100);
+        }
+        
+        // Execute scroll
+        scrollToNewMessage();
+    </script>
+    """, unsafe_allow_html=True)
+    
+    # Reset scroll flag
+    st.session_state["should_scroll"] = False
+
 # Show helpful message if there are messages
 if st.session_state["messages"]:
     st.info("💡 You can keep asking follow-up questions! Ask for modifications, more details, or different workout variations.")
@@ -683,12 +869,26 @@ if st.session_state["messages"]:
 if "pre_filled_question" in st.session_state and st.session_state["pre_filled_question"]:
     user_input = st.session_state["pre_filled_question"]
     st.session_state["pre_filled_question"] = None  # Clear after use
+    st.session_state["prefilled_triggered"] = True  # Flag to track pre-filled question
+    
+    # Trigger immediate auto-scroll for pre-filled questions
+    st.markdown("""
+    <script>
+        // Use the global scroll function
+        if (window.scrollToChatInput) {
+            window.scrollToChatInput();
+        }
+    </script>
+    """, unsafe_allow_html=True)
 else:
     user_input = st.chat_input(get_text("chat_placeholder"))
 
 if user_input:
     # Display user message
     st.chat_message("user").write(user_input)
+    
+    # Set scroll flag for new user message
+    st.session_state["should_scroll"] = True
     
     # Get AI response
     try:
@@ -697,6 +897,13 @@ if user_input:
         
         # Display AI response
         st.chat_message("assistant").write(ai_answer)
+        
+        # Set scroll flag for AI response
+        st.session_state["should_scroll"] = True
+        
+        # Clear the prefilled flag after use
+        if st.session_state.get("prefilled_triggered", False):
+            st.session_state["prefilled_triggered"] = False
         
         # Add messages to session state
         st.session_state["messages"].append({"role": "user", "content": user_input})
@@ -708,8 +915,17 @@ if user_input:
     except Exception as e:
         # Show a helpful message instead of error
         st.chat_message("assistant").write(get_text("error_message"))
+        
+        # Set scroll flag for error response
+        st.session_state["should_scroll"] = True
+        
+        # Clear the prefilled flag after use
+        if st.session_state.get("prefilled_triggered", False):
+            st.session_state["prefilled_triggered"] = False
+        
         st.session_state["messages"].append({"role": "user", "content": user_input})
         st.session_state["messages"].append({"role": "assistant", "content": "Network connection issue - AI response unavailable."})
+        
         st.rerun()
 
 # Footer

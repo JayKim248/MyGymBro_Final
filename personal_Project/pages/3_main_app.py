@@ -119,10 +119,7 @@ if "user_email" not in st.session_state:
     st.session_state["user_email"] = None
 if "user_data" not in st.session_state:
     st.session_state["user_data"] = {}
-if "last_message_count" not in st.session_state:
-    st.session_state["last_message_count"] = 0
-if "should_scroll" not in st.session_state:
-    st.session_state["should_scroll"] = False
+# Removed scroll tracking variables - using simpler approach
 
 # Data directory setup
 DATA_DIR = Path("data")
@@ -829,37 +826,21 @@ for message in st.session_state["messages"]:
     with st.chat_message(message["role"]):
         st.write(message["content"])
 
-# Check if we should scroll (after messages are displayed)
-if st.session_state.get("should_scroll", False):
-    st.markdown("""
+# Always scroll if there are messages (more reliable approach)
+if st.session_state["messages"]:
+    # Use the more reliable JavaScript approach
+    js = f"""
     <script>
-        // Enhanced scroll function for new messages
-        function scrollToNewMessage() {
-            setTimeout(() => {
-                // Try multiple strategies
-                const chatMessages = document.querySelectorAll('[data-testid="stChatMessage"]');
-                if (chatMessages.length > 0) {
-                    chatMessages[chatMessages.length - 1].scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'end' 
-                    });
-                } else {
-                    // Fallback to window scroll
-                    window.scrollTo({
-                        top: document.body.scrollHeight,
-                        behavior: 'smooth'
-                    });
-                }
-            }, 100);
-        }
-        
-        // Execute scroll
-        scrollToNewMessage();
+        function scroll(dummy_var_to_force_repeat_execution){{
+            var textAreas = parent.document.querySelectorAll('section.main');
+            for (let index = 0; index < textAreas.length; index++) {{
+                textAreas[index].scrollTop = textAreas[index].scrollHeight;
+            }}
+        }}
+        scroll({len(st.session_state["messages"])});
     </script>
-    """, unsafe_allow_html=True)
-    
-    # Reset scroll flag
-    st.session_state["should_scroll"] = False
+    """
+    st.markdown(js, unsafe_allow_html=True)
 
 # Show helpful message if there are messages
 if st.session_state["messages"]:
@@ -887,9 +868,6 @@ if user_input:
     # Display user message
     st.chat_message("user").write(user_input)
     
-    # Set scroll flag for new user message
-    st.session_state["should_scroll"] = True
-    
     # Get AI response
     try:
         with st.spinner(get_text("loading_message")):
@@ -897,9 +875,6 @@ if user_input:
         
         # Display AI response
         st.chat_message("assistant").write(ai_answer)
-        
-        # Set scroll flag for AI response
-        st.session_state["should_scroll"] = True
         
         # Clear the prefilled flag after use
         if st.session_state.get("prefilled_triggered", False):
@@ -915,9 +890,6 @@ if user_input:
     except Exception as e:
         # Show a helpful message instead of error
         st.chat_message("assistant").write(get_text("error_message"))
-        
-        # Set scroll flag for error response
-        st.session_state["should_scroll"] = True
         
         # Clear the prefilled flag after use
         if st.session_state.get("prefilled_triggered", False):

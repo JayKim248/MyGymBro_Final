@@ -1,0 +1,36 @@
+{
+  "jay_kim@ridleycollege.com": {
+    "email": "jay_kim@ridleycollege.com",
+    "password": "d649e6dd0a186ddf6055dcf58324bc4742e6585442fd3c93643f56bc88773461",
+    "first_name": "jay",
+    "last_name": "Kim",
+    "age": 15,
+    "gender": "Male",
+    "fitness_level": "Intermediate",
+    "created_at": "2025-10-24T20:17:53.890886",
+    "last_login": null,
+    "workout_history": [],
+    "preferences": {
+      "language": "English",
+      "notifications": true,
+      "theme": "light"
+    }
+  },
+  "Dao_Ti_Vu_Phung@ridleycollege.com": {
+    "email": "Dao_Ti_Vu_Phung@ridleycollege.com",
+    "password": "213599688b5286e51d45efc21133a752e14245d9302e95e9c6f775a50660ec18",
+    "first_name": "Martin",
+    "last_name": "Phung",
+    "age": 15,
+    "gender": "Male",
+    "fitness_level": "Beginner",
+    "created_at": "2025-10-24T20:20:27.791922",
+    "last_login": null,
+    "workout_history": [],
+    "preferences": {
+      "language": "English",
+      "notifications": true,
+      "theme": "light"
+    }
+  }
+}

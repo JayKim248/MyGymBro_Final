@@ -826,21 +826,7 @@ for message in st.session_state["messages"]:
     with st.chat_message(message["role"]):
         st.write(message["content"])
 
-# Always scroll if there are messages (more reliable approach)
-if st.session_state["messages"]:
-    # Use the more reliable JavaScript approach
-    js = f"""
-    <script>
-        function scroll(dummy_var_to_force_repeat_execution){{
-            var textAreas = parent.document.querySelectorAll('section.main');
-            for (let index = 0; index < textAreas.length; index++) {{
-                textAreas[index].scrollTop = textAreas[index].scrollHeight;
-            }}
-        }}
-        scroll({len(st.session_state["messages"])});
-    </script>
-    """
-    st.markdown(js, unsafe_allow_html=True)
+# Display messages without auto-scroll here (will be handled after AI response)
 
 # Show helpful message if there are messages
 if st.session_state["messages"]:
@@ -876,13 +862,27 @@ if user_input:
         # Display AI response
         st.chat_message("assistant").write(ai_answer)
         
+        # Add messages to session state
+        st.session_state["messages"].append({"role": "user", "content": user_input})
+        st.session_state["messages"].append({"role": "assistant", "content": ai_answer})
+        
         # Clear the prefilled flag after use
         if st.session_state.get("prefilled_triggered", False):
             st.session_state["prefilled_triggered"] = False
         
-        # Add messages to session state
-        st.session_state["messages"].append({"role": "user", "content": user_input})
-        st.session_state["messages"].append({"role": "assistant", "content": ai_answer})
+        # Auto-scroll AFTER AI response is completely generated and displayed
+        st.markdown("""
+        <script>
+            // Scroll after AI response is fully rendered
+            setTimeout(function(){
+                var textAreas = parent.document.querySelectorAll('section.main');
+                for (let index = 0; index < textAreas.length; index++) {
+                    textAreas[index].scrollTop = textAreas[index].scrollHeight;
+                }
+                console.log('Auto-scroll executed after AI response');
+            }, 300);
+        </script>
+        """, unsafe_allow_html=True)
         
         # Force rerun to show the new messages and enable continuous chat
         st.rerun()
@@ -897,6 +897,20 @@ if user_input:
         
         st.session_state["messages"].append({"role": "user", "content": user_input})
         st.session_state["messages"].append({"role": "assistant", "content": "Network connection issue - AI response unavailable."})
+        
+        # Auto-scroll AFTER error message is displayed
+        st.markdown("""
+        <script>
+            // Scroll after error message is fully rendered
+            setTimeout(function(){
+                var textAreas = parent.document.querySelectorAll('section.main');
+                for (let index = 0; index < textAreas.length; index++) {
+                    textAreas[index].scrollTop = textAreas[index].scrollHeight;
+                }
+                console.log('Auto-scroll executed after error message');
+            }, 300);
+        </script>
+        """, unsafe_allow_html=True)
         
         st.rerun()
 

@@ -120,7 +120,34 @@ if "user_data" not in st.session_state:
 DATA_DIR = Path("data")
 DATA_DIR.mkdir(exist_ok=True)
 USER_PROFILE_PATH = DATA_DIR / "user_profiles.json"
+USERS_FILE = DATA_DIR / "users.json"
 EQUIPMENT_FILE = DATA_DIR / "GymMachineList.xlsx"
+
+# Functions to load and save user data
+def load_users():
+    """Load users from JSON file."""
+    if USERS_FILE.exists():
+        with open(USERS_FILE, 'r') as f:
+            return json.load(f)
+    return {}
+
+def save_users(users):
+    """Save users to JSON file."""
+    with open(USERS_FILE, 'w') as f:
+        json.dump(users, f, indent=2)
+
+def update_user_profile(email, updated_data):
+    """Update user profile data in the JSON file and session state."""
+    users = load_users()
+    if email in users:
+        # Update the user data
+        users[email].update(updated_data)
+        save_users(users)
+        
+        # Update session state
+        st.session_state["user_data"] = users[email]
+        return True
+    return False
 
 # Translation dictionaries
 TRANSLATIONS = {
@@ -478,8 +505,8 @@ def calculate_heart_rate_range(age, fitness_level):
     
     return min_hr, max_hr
 
-# AI response function
-def get_ai_response(question, prompt_type):
+# AI response function - returns a generator for streaming
+def get_ai_response_stream(question, prompt_type):
     import ssl
     import httpx
     
@@ -506,16 +533,23 @@ def get_ai_response(question, prompt_type):
     
     system_prompt = system_prompts.get(current_language, system_prompts["English"])
     
-    response = client.chat.completions.create(
+    # Use streaming API
+    stream = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": question}
         ],
         temperature=0.4,
-        max_tokens=1000
+        max_tokens=1000,
+        stream=True  # Enable streaming
     )
-    return response.choices[0].message.content
+    
+    # Generator function that yields tokens as they arrive
+    for chunk in stream:
+        if chunk.choices[0].delta.content is not None:
+            content = chunk.choices[0].delta.content
+            yield content
 
 # Check authentication
 check_authentication()
@@ -544,6 +578,155 @@ with st.sidebar:
         st.markdown(f"**Name:** {user_data.get('first_name', '')} {user_data.get('last_name', '')}")
         st.markdown(f"**Email:** {st.session_state['user_email']}")
         st.markdown(f"**Fitness Level:** {user_data.get('fitness_level', 'Not specified')}")
+        
+        # Display current weight and measurements
+        current_weight = user_data.get('weight_lbs', 'N/A')
+        if current_weight != 'N/A':
+            st.markdown(f"**Current Weight:** {current_weight} lbs")
+        
+        # Display muscle measurements if available
+        muscle_measurements = user_data.get('muscle_measurements', {})
+        if muscle_measurements:
+            st.markdown("**Muscle Measurements:**")
+            for muscle, measurement in muscle_measurements.items():
+                st.markdown(f"  - {muscle.replace('_', ' ').title()}: {measurement} inches")
+        
+        st.markdown("---")
+        
+        # Update Weight and Muscle Measurements Section
+        with st.expander("📏 Update Weight & Measurements", expanded=False):
+            st.markdown("### Update Weight")
+            with st.form("update_weight_form"):
+                new_weight_lbs = st.number_input(
+                    "Weight (lbs)",
+                    min_value=66.0,
+                    max_value=440.0,
+                    value=float(user_data.get('weight_lbs', 154)),
+                    step=0.1,
+                    key="update_weight"
+                )
+                update_weight_button = st.form_submit_button("💾 Update Weight", use_container_width=True)
+                
+                if update_weight_button:
+                    # Convert weight to kg
+                    new_weight_kg = new_weight_lbs * 0.453592
+                    
+                    # Update user data
+                    updated_data = {
+                        'weight_lbs': round(new_weight_lbs, 1),
+                        'weight_kg': round(new_weight_kg, 2)
+                    }
+                    
+                    if update_user_profile(st.session_state['user_email'], updated_data):
+                        st.success(f"✅ Weight updated to {new_weight_lbs} lbs!")
+                        st.rerun()
+                    else:
+                        st.error("❌ Failed to update weight. Please try again.")
+            
+            st.markdown("---")
+            st.markdown("### Update Muscle Measurements")
+            
+            with st.form("update_muscles_form"):
+                # Initialize muscle measurements if they don't exist
+                if 'muscle_measurements' not in user_data:
+                    user_data['muscle_measurements'] = {}
+                
+                muscle_measurements = user_data.get('muscle_measurements', {})
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    chest = st.number_input(
+                        "Chest (inches)",
+                        min_value=20.0,
+                        max_value=60.0,
+                        value=float(muscle_measurements.get('chest', 38.0)),
+                        step=0.1,
+                        key="update_chest"
+                    )
+                    biceps_left = st.number_input(
+                        "Biceps Left (inches)",
+                        min_value=8.0,
+                        max_value=25.0,
+                        value=float(muscle_measurements.get('biceps_left', 12.0)),
+                        step=0.1,
+                        key="update_biceps_left"
+                    )
+                    waist = st.number_input(
+                        "Waist (inches)",
+                        min_value=20.0,
+                        max_value=60.0,
+                        value=float(muscle_measurements.get('waist', 32.0)),
+                        step=0.1,
+                        key="update_waist"
+                    )
+                    thigh_left = st.number_input(
+                        "Thigh Left (inches)",
+                        min_value=15.0,
+                        max_value=40.0,
+                        value=float(muscle_measurements.get('thigh_left', 22.0)),
+                        step=0.1,
+                        key="update_thigh_left"
+                    )
+                
+                with col2:
+                    shoulders = st.number_input(
+                        "Shoulders (inches)",
+                        min_value=30.0,
+                        max_value=60.0,
+                        value=float(muscle_measurements.get('shoulders', 42.0)),
+                        step=0.1,
+                        key="update_shoulders"
+                    )
+                    biceps_right = st.number_input(
+                        "Biceps Right (inches)",
+                        min_value=8.0,
+                        max_value=25.0,
+                        value=float(muscle_measurements.get('biceps_right', 12.0)),
+                        step=0.1,
+                        key="update_biceps_right"
+                    )
+                    hips = st.number_input(
+                        "Hips (inches)",
+                        min_value=25.0,
+                        max_value=55.0,
+                        value=float(muscle_measurements.get('hips', 36.0)),
+                        step=0.1,
+                        key="update_hips"
+                    )
+                    thigh_right = st.number_input(
+                        "Thigh Right (inches)",
+                        min_value=15.0,
+                        max_value=40.0,
+                        value=float(muscle_measurements.get('thigh_right', 22.0)),
+                        step=0.1,
+                        key="update_thigh_right"
+                    )
+                
+                update_muscles_button = st.form_submit_button("💾 Update Measurements", use_container_width=True)
+                
+                if update_muscles_button:
+                    # Update muscle measurements
+                    updated_measurements = {
+                        'chest': round(chest, 1),
+                        'shoulders': round(shoulders, 1),
+                        'biceps_left': round(biceps_left, 1),
+                        'biceps_right': round(biceps_right, 1),
+                        'waist': round(waist, 1),
+                        'hips': round(hips, 1),
+                        'thigh_left': round(thigh_left, 1),
+                        'thigh_right': round(thigh_right, 1)
+                    }
+                    
+                    updated_data = {
+                        'muscle_measurements': updated_measurements
+                    }
+                    
+                    if update_user_profile(st.session_state['user_email'], updated_data):
+                        st.success("✅ Muscle measurements updated successfully!")
+                        st.rerun()
+                    else:
+                        st.error("❌ Failed to update measurements. Please try again.")
+        
         st.markdown("---")
     
     st.markdown("### 🎛️ Settings")
@@ -833,14 +1016,18 @@ if st.session_state["messages"] and st.session_state["messages"][-1]["role"] == 
     # Get the last user message
     last_user_message = st.session_state["messages"][-1]["content"]
     
-    # Get AI response with loading spinner
-    with st.spinner(get_text("loading_message")):
-        ai_answer = get_ai_response(last_user_message, selected_prompt)
+    # Create a placeholder for the assistant message
+    with st.chat_message("assistant"):
+        # Use write_stream to stream the response word by word
+        # This displays the response progressively as tokens arrive
+        full_response = st.write_stream(get_ai_response_stream(last_user_message, selected_prompt))
     
-    # Add AI response to session state
-    st.session_state["messages"].append({"role": "assistant", "content": ai_answer})
+    # Add AI response to session state after streaming completes
+    # This ensures the message persists in the chat history
+    st.session_state["messages"].append({"role": "assistant", "content": full_response})
     
-    # Force rerun to show the AI response
+    # Rerun to update the UI and ensure the message is saved properly
+    # The streamed content will now be displayed from session_state on next render
     st.rerun()
 
 # Footer

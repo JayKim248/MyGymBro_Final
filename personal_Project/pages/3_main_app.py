@@ -1,3 +1,64 @@
+"""
+MyGymBro - Student Gym Routine Builder
+Main Application Page
+
+=== 주요 변경 사항 (Major Changes) ===
+	
+1. 오토스크롤 문제 해결 (Auto-scroll Issue Resolution)
+   - 문제: JavaScript 기반 scroll 기능이 충돌을 일으키고 메시지 표시에 문제 발생
+   - 해결: 모든 JavaScript scroll 코드 제거하고 Streamlit의 기본 rerun() 메커니즘만 사용
+   - 동작 방식:
+     * 사용자 입력/버튼 클릭 → session_state에 메시지 추가 → st.rerun()
+     * rerun 후 모든 메시지를 for loop로 다시 표시
+     * Streamlit이 자동으로 새 메시지가 추가될 때 하단으로 스크롤 처리
+
+2. 메시지 처리 구조 개선 (Message Handling Structure Improvement)
+   - 이전: 메시지를 화면에 먼저 표시 → session_state에 저장
+   - 변경: 메시지를 session_state에 먼저 저장 → rerun → 모든 메시지 다시 표시
+   - 참고: 09-MiniProject-seungri/pages/3_main_chat.py 구조 적용
+   - 장점: 메시지 중복 방지, 일관된 상태 관리, 자연스러운 스크롤
+
+3. UI 레이아웃 재구성 (UI Layout Restructuring)
+   - 버튼 메뉴를 메인 영역에서 사이드바로 이동
+   - 사이드바에 expander를 사용하여 카테고리별로 정리:
+     * 💪 Basic Workouts (기본 열림)
+     * 🎯 Advanced Workouts (기본 닫힘)
+     * 😂 Fun & Meme Workouts (기본 닫힘)
+     * 👑 Clash Royale Themed (특정 사용자용, 기본 닫힘)
+     * 📊 Additional Tools
+   - 메인 영역: 채팅 인터페이스만 표시 (깔끔한 대화 중심 UI)
+
+4. 코드 단순화 (Code Simplification)
+   - try-except 블록 제거: 에러 처리를 Streamlit 기본 방식으로 변경
+   - Loading spinner 제거: 사용자 메시지가 먼저 표시되고, 그 다음 AI 응답 생성
+   - 2단계 처리 방식:
+     * 1단계: 사용자 입력 → session_state에 추가 → rerun (사용자 메시지 표시)
+     * 2단계: 마지막 메시지가 user인지 확인 → AI 응답 생성 → session_state에 추가 → rerun (AI 응답 표시)
+
+5. Pre-filled Question 처리 개선
+   - 버튼 클릭 시 pre_filled_question 설정 → 즉시 rerun
+   - rerun 후 pre_filled_question 처리 → 사용자 메시지로 변환 → 다시 rerun
+   - elif를 사용하여 chat_input과 분리하여 충돌 방지
+
+=== 기술적 세부사항 (Technical Details) ===
+
+- Scroll 관련 제거된 코드:
+  * JavaScript scrollToBottom(), scrollToChatInput() 함수
+  * window.addEventListener('load', scrollToBottom)
+  * window.addEventListener('message', ...) 이벤트 리스너
+  * setTimeout을 사용한 scroll 호출
+
+- 메시지 표시 방식:
+  * for message in st.session_state["messages"]: st.chat_message(...).write(...)
+  * rerun할 때마다 전체 메시지 리스트를 다시 렌더링
+  * Streamlit이 자동으로 새 콘텐츠에 맞춰 스크롤 조정
+
+- 상태 관리:
+  * session_state["messages"]: 모든 대화 메시지 저장
+  * session_state["pre_filled_question"]: 버튼 클릭 시 생성되는 질문
+  * session_state["prefilled_triggered"]: pre-filled question 플래그
+"""
+
 import streamlit as st
 from dotenv import load_dotenv
 import json
@@ -17,7 +78,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS and JavaScript for auto-scroll
+# Custom CSS
 st.markdown("""
 <style>
     .main-header {
@@ -36,83 +97,17 @@ st.markdown("""
         margin: 0.5rem 0;
         border-left: 4px solid #ff6b6b;
     }
-    .chat-container {
-        scroll-behavior: smooth;
-    }
     .stChatMessage {
         margin-bottom: 1rem;
     }
 </style>
-
-<script>
-    // Enhanced auto-scroll function
-    function scrollToBottom() {
-        // Multiple attempts with different strategies
-        setTimeout(() => {
-            // Strategy 1: Scroll to the last chat message
-            const chatMessages = document.querySelectorAll('[data-testid="stChatMessage"]');
-            if (chatMessages.length > 0) {
-                chatMessages[chatMessages.length - 1].scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'end' 
-                });
-                return;
-            }
-            
-            // Strategy 2: Scroll to chat input
-            const chatInput = document.querySelector('[data-testid="stChatInput"]');
-            if (chatInput) {
-                chatInput.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'center' 
-                });
-                return;
-            }
-            
-            // Strategy 3: Scroll to bottom of page
-            window.scrollTo({
-                top: document.body.scrollHeight,
-                behavior: 'smooth'
-            });
-        }, 200);
-    }
-    
-    // Function to scroll to chat input
-    function scrollToChatInput() {
-        setTimeout(() => {
-            const chatInput = document.querySelector('[data-testid="stChatInput"]');
-            if (chatInput) {
-                chatInput.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'center' 
-                });
-            } else {
-                scrollToBottom();
-            }
-        }, 100);
-    }
-    
-    // Auto-scroll on page load
-    window.addEventListener('load', scrollToBottom);
-    
-    // Auto-scroll when Streamlit reruns
-    window.addEventListener('message', function(event) {
-        if (event.data && event.data.type === 'streamlit:rerun') {
-            setTimeout(scrollToBottom, 300);
-        }
-    });
-    
-    // Make functions globally available
-    window.scrollToBottom = scrollToBottom;
-    window.scrollToChatInput = scrollToChatInput;
-</script>
 """, unsafe_allow_html=True)
 
 # Initialize session state
-if "messages" not in st.session_state:
-    st.session_state["messages"] = []
 if "language" not in st.session_state:
     st.session_state["language"] = "English"
+if "messages" not in st.session_state:
+    st.session_state["messages"] = []
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
 if "user_email" not in st.session_state:
@@ -582,167 +577,152 @@ with st.sidebar:
     # Set default prompt mode (controlled from backend)
     selected_prompt = "Basic Mode"  # Default mode, can be changed in backend
     
+    # Get additional user data for workout generation
+    age = user_data.get("age", 20)
+    gender = user_data.get("gender", "Male")
+    fitness_level = user_data.get("fitness_level", "Average")
+    exercise_frequency = user_data.get("exercise_frequency", "3x/week")
+    sports_activities = user_data.get("sports_activities", [])
     
+    # Workout Plan Generator Buttons in Sidebar
+    st.markdown("### 🏋️ Workout Plans")
+    st.markdown("*Click to generate workout routines*")
+    
+    # Quick workout plan buttons
+    with st.expander("💪 Basic Workouts", expanded=True):
+        if st.button("💪 Full Body Workout", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create a full body workout routine for me using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Focus on compound movements and include proper warm-up and cool-down."
+            st.rerun()
+        
+        if st.button("🔥 Upper Body Focus", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create an upper body focused workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Include chest, back, shoulders, and arms exercises."
+            st.rerun()
+        
+        if st.button("🦵 Lower Body Focus", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create a lower body focused workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Include legs, glutes, and core exercises."
+            st.rerun()
+        
+        if st.button("📅 Full Weekly Split", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create a complete weekly workout split for me using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Plan out each day of the week with specific exercises, sets, reps, and rest days. Make it a balanced program that targets all muscle groups throughout the week."
+            st.rerun()
+        
+        if st.button("⚡ Quick 30-min Workout", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create a quick 30-minute workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Make it efficient and effective for busy students."
+            st.rerun()
+        
+        if st.button("🏃 Cardio + Strength", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create a cardio and strength combined workout using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Include both cardio and strength training elements."
+            st.rerun()
+    
+    with st.expander("🎯 Advanced Workouts", expanded=False):
+        if st.button("🎯 Beginner-Friendly", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create a beginner-friendly workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, beginner fitness level, exercise {exercise_frequency.lower()}{sports_info}. Focus on proper form and progression."
+            st.rerun()
+        
+        if st.button("💪 Push/Pull/Legs Split", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create a push/pull/legs workout split using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Include push day (chest, shoulders, triceps), pull day (back, biceps), and legs day with proper rest between muscle groups."
+            st.rerun()
+        
+        if st.button("🔥 High Intensity Training", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create a high intensity training (HIT) workout using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Focus on maximum effort with shorter rest periods and higher intensity."
+            st.rerun()
+    
+    with st.expander("😂 Fun & Meme Workouts", expanded=False):
+        if st.button("😭 Man United Fan Workout", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create a funny workout routine for a Manchester United fan who's been crying all day about their team's performance. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Make it therapeutic and include exercises that help with emotional stress relief, like heavy lifting to channel frustration, cardio to sweat out the tears, and maybe some yoga for inner peace. Add some humor and motivation!"
+            st.rerun()
+        
+        if st.button("👑 Clash Royale Rage Workout", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create a workout routine for someone who gets mad at MegaKnight in Clash Royale. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Include explosive movements to channel the rage, cardio to burn off the frustration, and strength training to feel powerful. Make it fun and include some gaming references!"
+            st.rerun()
+        
+        if st.button("🎮 Gamer's Revenge Workout", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create a workout for a gamer who needs to get revenge on their opponents. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Focus on building strength and endurance to dominate in both real life and gaming. Include exercises that improve hand-eye coordination and reaction time!"
+            st.rerun()
+        
+        if st.button("🍕 Pizza Recovery Workout", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create a workout routine for someone who ate too much pizza and needs to burn it off. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Focus on cardio and core exercises to work off those extra calories, but make it fun and not too intense since I'm probably feeling sluggish!"
+            st.rerun()
+        
+        if st.button("😴 Lazy Day Motivation", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create a gentle but effective workout for someone having a lazy day but still wants to move. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Make it easy to start but progressively engaging, with lots of motivation and encouragement!"
+            st.rerun()
+        
+        if st.button("🎯 Procrastination Fighter", use_container_width=True):
+            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+            st.session_state["pre_filled_question"] = f"Create a workout routine for someone who's procrastinating on their studies/work and needs to get moving. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Make it energizing and motivating, with exercises that help clear the mind and boost productivity!"
+            st.rerun()
+    
+    # Clash Royale themed workouts (only for Clash Royale players)
+    if st.session_state.get("user_email") == "clashroyale.player@mygymbro.com":
+        with st.expander("👑 Clash Royale Themed", expanded=False):
+            if st.button("🛡️ MegaKnight's Rage Workout", use_container_width=True):
+                sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+                st.session_state["pre_filled_question"] = f"Create a MegaKnight-themed workout routine! I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. MegaKnight is all about explosive power and heavy hits, so include exercises that build explosive strength, heavy lifting, and powerful movements. Think jumping exercises, heavy squats, and explosive push-ups. Make it intense and rage-filled like when MegaKnight drops on your troops!"
+                st.rerun()
+            
+            if st.button("⚔️ P.E.K.K.A.'s Armor Workout", use_container_width=True):
+                sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+                st.session_state["pre_filled_question"] = f"Create a P.E.K.K.A.-themed workout routine! I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. P.E.K.K.A. is the ultimate tank with heavy armor, so focus on building massive strength, endurance, and that tank-like physique. Include heavy compound movements, long sets, and exercises that make you feel like an unstoppable armored warrior. Think deadlifts, heavy presses, and endurance challenges!"
+                st.rerun()
+            
+            if st.button("👑 King's Royal Workout", use_container_width=True):
+                sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+                st.session_state["pre_filled_question"] = f"Create a King-themed workout routine! I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. The King is the leader of the arena, so this should be a royal, comprehensive workout that covers all aspects of fitness. Include exercises that build strength, agility, and royal presence. Think full-body movements, balance exercises, and workouts that make you feel like the ruler of the gym!"
+                st.rerun()
+            
+            if st.button("🏹 Archer Queen's Precision", use_container_width=True):
+                sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+                st.session_state["pre_filled_question"] = f"Create an Archer Queen-themed workout routine! I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. The Archer Queen is all about precision, agility, and long-range power. Focus on exercises that improve coordination, balance, and upper body strength. Include exercises that require precision and control, like single-arm movements, balance challenges, and core stability work!"
+                st.rerun()
+            
+            if st.button("⚡ Sparky's Electric Power", use_container_width=True):
+                sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+                st.session_state["pre_filled_question"] = f"Create a Sparky-themed workout routine! I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Sparky charges up for massive damage, so this workout should focus on explosive power and high-intensity bursts. Include exercises that build explosive strength, like plyometrics, sprint intervals, and exercises that require maximum effort in short bursts. Make it electric and high-energy!"
+                st.rerun()
+            
+            if st.button("🏰 X-Bow's Tower Defense", use_container_width=True):
+                sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
+                st.session_state["pre_filled_question"] = f"Create an X-Bow-themed workout routine! I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. The X-Bow is a defensive building that requires stability and endurance. Focus on exercises that build stability, endurance, and defensive strength. Include isometric holds, endurance exercises, and movements that require sustained effort. Think planks, wall sits, and long-duration exercises!"
+                st.rerun()
+    
+    st.markdown("---")
+    
+    # Additional Tools
+    st.markdown("### 📊 Additional Tools")
+    if st.button("🔥 Calculate my maintenance calories", use_container_width=True):
+        st.session_state["show_calorie_calculation"] = True
+        st.rerun()
+    
+    if st.button("💬 Ask MyGymBro anything", use_container_width=True):
+        st.session_state["pre_filled_question"] = "I have a question about my fitness routine or nutrition. Please help me with personalized advice based on my information."
+        st.rerun()
 
-# Get additional user data for workout generation
+# Get additional user data for workout generation (for use in main area if needed)
+user_data = st.session_state.get("user_data", {}) or {}
 age = user_data.get("age", 20)
 gender = user_data.get("gender", "Male")
 fitness_level = user_data.get("fitness_level", "Average")
 exercise_frequency = user_data.get("exercise_frequency", "3x/week")
 sports_activities = user_data.get("sports_activities", [])
 
-# Main workout plan generator
-st.markdown("### 🏋️ Create Your Workout Plan")
-st.markdown("Get a personalized workout routine based on your gym's available equipment:")
-
-# Quick workout plan buttons
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    if st.button("💪 Full Body Workout", use_container_width=True):
-        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-        st.session_state["pre_filled_question"] = f"Create a full body workout routine for me using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Focus on compound movements and include proper warm-up and cool-down."
-
-with col2:
-    if st.button("🔥 Upper Body Focus", use_container_width=True):
-        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-        st.session_state["pre_filled_question"] = f"Create an upper body focused workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Include chest, back, shoulders, and arms exercises."
-
-with col3:
-    if st.button("🦵 Lower Body Focus", use_container_width=True):
-        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-        st.session_state["pre_filled_question"] = f"Create a lower body focused workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Include legs, glutes, and core exercises."
-
-# Additional workout options
-col4, col5, col6 = st.columns(3)
-
-with col4:
-    if st.button("📅 Full Weekly Split", use_container_width=True):
-        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-        st.session_state["pre_filled_question"] = f"Create a complete weekly workout split for me using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Plan out each day of the week with specific exercises, sets, reps, and rest days. Make it a balanced program that targets all muscle groups throughout the week."
-
-with col5:
-    if st.button("⚡ Quick 30-min Workout", use_container_width=True):
-        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-        st.session_state["pre_filled_question"] = f"Create a quick 30-minute workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Make it efficient and effective for busy students."
-
-with col6:
-    if st.button("🏃 Cardio + Strength", use_container_width=True):
-        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-        st.session_state["pre_filled_question"] = f"Create a cardio and strength combined workout using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Include both cardio and strength training elements."
-
-# More workout options
-col7, col8, col9 = st.columns(3)
-
-with col7:
-    if st.button("🎯 Beginner-Friendly", use_container_width=True):
-        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-        st.session_state["pre_filled_question"] = f"Create a beginner-friendly workout routine using the available gym equipment. I'm a {age}-year-old {gender.lower()}, beginner fitness level, exercise {exercise_frequency.lower()}{sports_info}. Focus on proper form and progression."
-
-with col8:
-    if st.button("💪 Push/Pull/Legs Split", use_container_width=True):
-        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-        st.session_state["pre_filled_question"] = f"Create a push/pull/legs workout split using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Include push day (chest, shoulders, triceps), pull day (back, biceps), and legs day with proper rest between muscle groups."
-
-with col9:
-    if st.button("🔥 High Intensity Training", use_container_width=True):
-        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-        st.session_state["pre_filled_question"] = f"Create a high intensity training (HIT) workout using the available gym equipment. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Focus on maximum effort with shorter rest periods and higher intensity."
-
-# Funny workout options
-st.markdown("---")
-st.markdown("### 😂 Fun & Meme Workouts")
-st.markdown("*Because fitness should be fun!*")
-
-col10, col11, col12 = st.columns(3)
-
-with col10:
-    if st.button("😭 Man United Fan Workout", use_container_width=True):
-        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-        st.session_state["pre_filled_question"] = f"Create a funny workout routine for a Manchester United fan who's been crying all day about their team's performance. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Make it therapeutic and include exercises that help with emotional stress relief, like heavy lifting to channel frustration, cardio to sweat out the tears, and maybe some yoga for inner peace. Add some humor and motivation!"
-
-with col11:
-    if st.button("👑 Clash Royale Rage Workout", use_container_width=True):
-        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-        st.session_state["pre_filled_question"] = f"Create a workout routine for someone who gets mad at MegaKnight in Clash Royale. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Include explosive movements to channel the rage, cardio to burn off the frustration, and strength training to feel powerful. Make it fun and include some gaming references!"
-
-with col12:
-    if st.button("🎮 Gamer's Revenge Workout", use_container_width=True):
-        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-        st.session_state["pre_filled_question"] = f"Create a workout for a gamer who needs to get revenge on their opponents. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Focus on building strength and endurance to dominate in both real life and gaming. Include exercises that improve hand-eye coordination and reaction time!"
-
-# More funny options
-col13, col14, col15 = st.columns(3)
-
-with col13:
-    if st.button("🍕 Pizza Recovery Workout", use_container_width=True):
-        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-        st.session_state["pre_filled_question"] = f"Create a workout routine for someone who ate too much pizza and needs to burn it off. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Focus on cardio and core exercises to work off those extra calories, but make it fun and not too intense since I'm probably feeling sluggish!"
-
-with col14:
-    if st.button("😴 Lazy Day Motivation", use_container_width=True):
-        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-        st.session_state["pre_filled_question"] = f"Create a gentle but effective workout for someone having a lazy day but still wants to move. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Make it easy to start but progressively engaging, with lots of motivation and encouragement!"
-
-with col15:
-    if st.button("🎯 Procrastination Fighter", use_container_width=True):
-        sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-        st.session_state["pre_filled_question"] = f"Create a workout routine for someone who's procrastinating on their studies/work and needs to get moving. I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Make it energizing and motivating, with exercises that help clear the mind and boost productivity!"
-
-# Clash Royale themed workouts (only for Clash Royale players)
-if st.session_state.get("user_email") == "clashroyale.player@mygymbro.com":
-    st.markdown("---")
-    st.markdown("### 👑 Clash Royale Themed Workouts")
-    st.markdown("*Channel your favorite Clash Royale characters!*")
-    
-    col16, col17, col18 = st.columns(3)
-    
-    with col16:
-        if st.button("🛡️ MegaKnight's Rage Workout", use_container_width=True):
-            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-            st.session_state["pre_filled_question"] = f"Create a MegaKnight-themed workout routine! I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. MegaKnight is all about explosive power and heavy hits, so include exercises that build explosive strength, heavy lifting, and powerful movements. Think jumping exercises, heavy squats, and explosive push-ups. Make it intense and rage-filled like when MegaKnight drops on your troops!"
-    
-    with col17:
-        if st.button("⚔️ P.E.K.K.A.'s Armor Workout", use_container_width=True):
-            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-            st.session_state["pre_filled_question"] = f"Create a P.E.K.K.A.-themed workout routine! I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. P.E.K.K.A. is the ultimate tank with heavy armor, so focus on building massive strength, endurance, and that tank-like physique. Include heavy compound movements, long sets, and exercises that make you feel like an unstoppable armored warrior. Think deadlifts, heavy presses, and endurance challenges!"
-    
-    with col18:
-        if st.button("👑 King's Royal Workout", use_container_width=True):
-            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-            st.session_state["pre_filled_question"] = f"Create a King-themed workout routine! I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. The King is the leader of the arena, so this should be a royal, comprehensive workout that covers all aspects of fitness. Include exercises that build strength, agility, and royal presence. Think full-body movements, balance exercises, and workouts that make you feel like the ruler of the gym!"
-    
-    # More Clash Royale themed workouts
-    col19, col20, col21 = st.columns(3)
-    
-    with col19:
-        if st.button("🏹 Archer Queen's Precision", use_container_width=True):
-            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-            st.session_state["pre_filled_question"] = f"Create an Archer Queen-themed workout routine! I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. The Archer Queen is all about precision, agility, and long-range power. Focus on exercises that improve coordination, balance, and upper body strength. Include exercises that require precision and control, like single-arm movements, balance challenges, and core stability work!"
-    
-    with col20:
-        if st.button("⚡ Sparky's Electric Power", use_container_width=True):
-            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-            st.session_state["pre_filled_question"] = f"Create a Sparky-themed workout routine! I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. Sparky charges up for massive damage, so this workout should focus on explosive power and high-intensity bursts. Include exercises that build explosive strength, like plyometrics, sprint intervals, and exercises that require maximum effort in short bursts. Make it electric and high-energy!"
-    
-    with col21:
-        if st.button("🏰 X-Bow's Tower Defense", use_container_width=True):
-            sports_info = f" and participate in {', '.join(sports_activities)}" if sports_activities else " and don't participate in any specific sports"
-            st.session_state["pre_filled_question"] = f"Create an X-Bow-themed workout routine! I'm a {age}-year-old {gender.lower()}, {fitness_level.lower()} fitness level, exercise {exercise_frequency.lower()}{sports_info}. The X-Bow is a defensive building that requires stability and endurance. Focus on exercises that build stability, endurance, and defensive strength. Include isometric holds, endurance exercises, and movements that require sustained effort. Think planks, wall sits, and long-duration exercises!"
-
-# Calorie calculator option
-st.markdown("---")
-st.markdown("### 📊 Additional Tools")
-
-col7, col8 = st.columns(2)
-
-with col7:
-    if st.button("🔥 Calculate my maintenance calories", use_container_width=True):
-        st.session_state["show_calorie_calculation"] = True
-
-with col8:
-    if st.button("💬 Ask MyGymBro anything", use_container_width=True):
-        st.session_state["pre_filled_question"] = "I have a question about my fitness routine or nutrition. Please help me with personalized advice based on my information."
+# Main area - Chat interface only
+st.markdown("### 💬 Chat with MyGymBro")
+st.markdown("*Use the sidebar buttons to generate workout plans or type your own questions*")
 
 # Calorie calculation using user data from session state
 if st.session_state.get("show_calorie_calculation", False):
@@ -823,96 +803,45 @@ st.markdown("---")
 
 # Display chat messages
 for message in st.session_state["messages"]:
-    with st.chat_message(message["role"]):
-        st.write(message["content"])
-
-# Display messages without auto-scroll here (will be handled after AI response)
+    st.chat_message(message["role"]).write(message["content"])
 
 # Show helpful message if there are messages
 if st.session_state["messages"]:
     st.info("💡 You can keep asking follow-up questions! Ask for modifications, more details, or different workout variations.")
 
 # Handle pre-filled questions
+user_input = None
 if "pre_filled_question" in st.session_state and st.session_state["pre_filled_question"]:
     user_input = st.session_state["pre_filled_question"]
     st.session_state["pre_filled_question"] = None  # Clear after use
     st.session_state["prefilled_triggered"] = True  # Flag to track pre-filled question
     
-    # Trigger immediate auto-scroll for pre-filled questions
-    st.markdown("""
-    <script>
-        // Use the global scroll function
-        if (window.scrollToChatInput) {
-            window.scrollToChatInput();
-        }
-    </script>
-    """, unsafe_allow_html=True)
-else:
-    user_input = st.chat_input(get_text("chat_placeholder"))
-
-if user_input:
-    # Display user message
-    st.chat_message("user").write(user_input)
+    # Add user message to session state first (this will show in chat immediately after rerun)
+    st.session_state["messages"].append({"role": "user", "content": user_input})
     
-    # Get AI response
-    try:
-        with st.spinner(get_text("loading_message")):
-            ai_answer = get_ai_response(user_input, selected_prompt)
-        
-        # Display AI response
-        st.chat_message("assistant").write(ai_answer)
-        
-        # Add messages to session state
-        st.session_state["messages"].append({"role": "user", "content": user_input})
-        st.session_state["messages"].append({"role": "assistant", "content": ai_answer})
-        
-        # Clear the prefilled flag after use
-        if st.session_state.get("prefilled_triggered", False):
-            st.session_state["prefilled_triggered"] = False
-        
-        # Auto-scroll AFTER AI response is completely generated and displayed
-        st.markdown("""
-        <script>
-            // Scroll after AI response is fully rendered
-            setTimeout(function(){
-                var textAreas = parent.document.querySelectorAll('section.main');
-                for (let index = 0; index < textAreas.length; index++) {
-                    textAreas[index].scrollTop = textAreas[index].scrollHeight;
-                }
-                console.log('Auto-scroll executed after AI response');
-            }, 300);
-        </script>
-        """, unsafe_allow_html=True)
-        
-        # Force rerun to show the new messages and enable continuous chat
-        st.rerun()
-        
-    except Exception as e:
-        # Show a helpful message instead of error
-        st.chat_message("assistant").write(get_text("error_message"))
-        
-        # Clear the prefilled flag after use
-        if st.session_state.get("prefilled_triggered", False):
-            st.session_state["prefilled_triggered"] = False
-        
-        st.session_state["messages"].append({"role": "user", "content": user_input})
-        st.session_state["messages"].append({"role": "assistant", "content": "Network connection issue - AI response unavailable."})
-        
-        # Auto-scroll AFTER error message is displayed
-        st.markdown("""
-        <script>
-            // Scroll after error message is fully rendered
-            setTimeout(function(){
-                var textAreas = parent.document.querySelectorAll('section.main');
-                for (let index = 0; index < textAreas.length; index++) {
-                    textAreas[index].scrollTop = textAreas[index].scrollHeight;
-                }
-                console.log('Auto-scroll executed after error message');
-            }, 300);
-        </script>
-        """, unsafe_allow_html=True)
-        
-        st.rerun()
+    # Force rerun to show the user message in chat first
+    st.rerun()
+elif user_input := st.chat_input(get_text("chat_placeholder")):
+    # Add user message to session state first (this will show in chat immediately after rerun)
+    st.session_state["messages"].append({"role": "user", "content": user_input})
+    
+    # Force rerun to show the user message in chat first
+    st.rerun()
+
+# Generate AI response if there's a user message without an assistant response
+if st.session_state["messages"] and st.session_state["messages"][-1]["role"] == "user":
+    # Get the last user message
+    last_user_message = st.session_state["messages"][-1]["content"]
+    
+    # Get AI response with loading spinner
+    with st.spinner(get_text("loading_message")):
+        ai_answer = get_ai_response(last_user_message, selected_prompt)
+    
+    # Add AI response to session state
+    st.session_state["messages"].append({"role": "assistant", "content": ai_answer})
+    
+    # Force rerun to show the AI response
+    st.rerun()
 
 # Footer
 st.markdown("---")

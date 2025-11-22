@@ -52,7 +52,7 @@
     "sports_activities": [
       "Baseball"
     ],
-    "created_at": "2025-11-14T19:26:00.488803",
+    "created_at": "2025-11-15T11:33:30.087944",
     "last_login": null,
     "workout_history": [],
     "preferences": {
@@ -80,7 +80,7 @@
     "sports_activities": [
       "Gaming"
     ],
-    "created_at": "2025-11-14T20:06:24.160907",
+    "created_at": "2025-11-15T12:01:16.450656",
     "last_login": null,
     "workout_history": [],
     "preferences": {
@@ -88,5 +88,137 @@
       "notifications": true,
       "theme": "light"
     }
+  },
+  "lev.ps@icloud.com": {
+    "email": "lev.ps@icloud.com",
+    "password": "b0c20c03ee3045437cb6a35b0f1fb7e8f34d269cde9d0bd9363842743e9469cd",
+    "first_name": "Lev",
+    "last_name": "Prokipchuk",
+    "created_at": "2025-11-15T11:13:26.049630",
+    "last_login": null,
+    "workout_history": [],
+    "preferences": {
+      "language": "English",
+      "notifications": true,
+      "theme": "light"
+    },
+    "height_feet": 5,
+    "height_inches": 10,
+    "weight_lbs": 145,
+    "lifestyle": "Active",
+    "exercise_experience": "1-3 years",
+    "fitness_level": "Above average",
+    "age": 20,
+    "gender": "Male",
+    "exercise_frequency": "6x/week",
+    "sports_activities": [
+      "Rowing",
+      "Swimming",
+      "Erg"
+    ],
+    "height_cm": 177.8,
+    "weight_kg": 65.77083999999999
+  },
+  "67@ridleycollege.com": {
+    "email": "67@ridleycollege.com",
+    "password": "d7ea14956ba2a69105f7a5539b6c304693aa7717db21927bcccbcc39dedae7c0",
+    "first_name": "67",
+    "last_name": "67",
+    "created_at": "2025-11-15T11:34:41.269141",
+    "last_login": null,
+    "workout_history": [],
+    "preferences": {
+      "language": "English",
+      "notifications": true,
+      "theme": "light"
+    }
+  },
+  "christian_girhiny@ridleycollege.com": {
+    "email": "christian_girhiny@ridleycollege.com",
+    "password": "9d347c424b029fbb388343e9c2d349deabfb25ca172f59a13717651cb926a2ad",
+    "first_name": "Christian",
+    "last_name": "Girhiny",
+    "created_at": "2025-11-19T19:39:44.312934",
+    "last_login": null,
+    "workout_history": [],
+    "preferences": {
+      "language": "English",
+      "notifications": true,
+      "theme": "light"
+    },
+    "height_feet": 5,
+    "height_inches": 11,
+    "weight_lbs": 160,
+    "lifestyle": "Student or office worker",
+    "exercise_experience": "5+ years advanced",
+    "fitness_level": "Below average",
+    "age": 20,
+    "gender": "Male",
+    "exercise_frequency": "4x/week",
+    "sports_activities": [
+      "Hockey"
+    ],
+    "height_cm": 180.34,
+    "weight_kg": 72.57472
+  },
+  "Razi@gmail.com": {
+    "email": "Razi@gmail.com",
+    "password": "ba1525a71c54740dc6f306a0599ecf4c134572cc43b051fa0b1f857c608e2620",
+    "first_name": "Razi",
+    "last_name": "kim",
+    "created_at": "2025-11-19T21:26:45.086098",
+    "last_login": null,
+    "workout_history": [],
+    "preferences": {
+      "language": "English",
+      "notifications": true,
+      "theme": "light"
+    },
+    "height_feet": 5,
+    "height_inches": 9,
+    "weight_lbs": 160,
+    "lifestyle": "Lying down 15+ hours",
+    "exercise_experience": "Beginner",
+    "fitness_level": "Very poor",
+    "age": 20,
+    "gender": "Male",
+    "exercise_frequency": "3x/week",
+    "sports_activities": [
+      "Swimming"
+    ],
+    "height_cm": 175.26,
+    "weight_kg": 72.57472
+  },
+  "drjay10032@gmail.com": {
+    "email": "drjay10032@gmail.com",
+    "password": "8eebd97f9676015caa848b46867df7ab60c6cbd2714c5b4bc785267c52f3f84e",
+    "first_name": "Jay",
+    "last_name": "KIM",
+    "created_at": "2025-11-21T19:17:17.285274",
+    "last_login": null,
+    "workout_history": [],
+    "preferences": {
+      "language": "English",
+      "notifications": true,
+      "theme": "light"
+    },
+    "height_feet": 5,
+    "height_inches": 11,
+    "weight_lbs": 193,
+    "lifestyle": "Active",
+    "exercise_experience": "1-3 years",
+    "fitness_level": "Average",
+    "age": 15,
+    "gender": "Male",
+    "exercise_frequency": "4x/week",
+    "sports_activities": [
+      "Swimming",
+      "Rugby"
+    ],
+    "height_cm": 180.34,
+    "weight_kg": 87.543256,
+    "bench_press_pr": 135.0,
+    "squat_pr": 225.0,
+    "ridley_crosscountry_time": 21.0
   }
 }

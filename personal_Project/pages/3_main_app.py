@@ -67,6 +67,13 @@ import os
 from openai import OpenAI
 import pandas as pd
 
+# Try to import matplotlib, but make it optional
+try:
+    import matplotlib.pyplot as plt
+    MATPLOTLIB_AVAILABLE = True
+except ImportError:
+    MATPLOTLIB_AVAILABLE = False
+
 # Load environment variables
 load_dotenv()
 
@@ -114,6 +121,11 @@ if "user_email" not in st.session_state:
     st.session_state["user_email"] = None
 if "user_data" not in st.session_state:
     st.session_state["user_data"] = {}
+# Custom workout form state
+if "custom_workout_step" not in st.session_state:
+    st.session_state["custom_workout_step"] = 1
+if "temp_custom_workout_data" not in st.session_state:
+    st.session_state["temp_custom_workout_data"] = {}
 # Removed scroll tracking variables - using simpler approach
 
 # Data directory setup
@@ -505,6 +517,73 @@ def calculate_heart_rate_range(age, fitness_level):
     
     return min_hr, max_hr
 
+def calculate_body_fat_navy(gender, age, height_cm, weight_kg, waist_cm, neck_cm=None):
+    """
+    Calculate body fat percentage using Navy Method.
+    Requires: gender, age, height, weight, waist circumference
+    Optional: neck circumference (for more accurate calculation)
+    """
+    # Convert cm to inches for Navy formula
+    height_inches = height_cm / 2.54
+    waist_inches = waist_cm / 2.54
+    neck_inches = neck_cm / 2.54 if neck_cm else None
+    
+    if gender.lower() in ["male", "m"]:
+        # Navy method for men
+        if neck_inches:
+            body_fat = 86.010 * ((waist_inches - neck_inches) / height_inches) - 70.041
+        else:
+            # Simplified version without neck measurement
+            # Using waist-to-height ratio
+            body_fat = 64 - (20 * (height_inches / waist_inches)) + (12 * age / 100)
+    else:
+        # Navy method for women (requires additional hip measurement)
+        # Using simplified BMI-based method for women
+        bmi = weight_kg / ((height_cm / 100) ** 2)
+        body_fat = (1.20 * bmi) + (0.23 * age) - 16.2
+    
+    return max(5, min(50, round(body_fat, 1)))  # Clamp between 5% and 50%
+
+def calculate_body_fat_bmi(gender, age, height_cm, weight_kg):
+    """
+    Calculate body fat percentage using Deurenberg formula (BMI-based).
+    Simpler method that doesn't require body measurements.
+    """
+    bmi = weight_kg / ((height_cm / 100) ** 2)
+    
+    if gender.lower() in ["male", "m"]:
+        body_fat = (1.20 * bmi) + (0.23 * age) - 16.2
+    else:
+        body_fat = (1.20 * bmi) + (0.23 * age) - 5.4
+    
+    return max(5, min(50, round(body_fat, 1)))  # Clamp between 5% and 50%
+
+def get_body_fat_category(body_fat, gender):
+    """Get body fat category based on percentage."""
+    if gender.lower() in ["male", "m"]:
+        categories = {
+            (0, 6): ("Essential Fat", "#4CAF50"),
+            (6, 14): ("Athletes", "#8BC34A"),
+            (14, 18): ("Fitness", "#CDDC39"),
+            (18, 25): ("Average", "#FFC107"),
+            (25, 32): ("Obese", "#FF9800"),
+            (32, 100): ("Very High", "#F44336")
+        }
+    else:
+        categories = {
+            (0, 14): ("Essential Fat", "#4CAF50"),
+            (14, 21): ("Athletes", "#8BC34A"),
+            (21, 25): ("Fitness", "#CDDC39"),
+            (25, 32): ("Average", "#FFC107"),
+            (32, 38): ("Obese", "#FF9800"),
+            (38, 100): ("Very High", "#F44336")
+        }
+    
+    for (low, high), (category, color) in categories.items():
+        if low <= body_fat < high:
+            return category, color
+    return "Unknown", "#9E9E9E"
+
 # AI response function - returns a generator for streaming
 def get_ai_response_stream(question, prompt_type):
     import ssl
@@ -593,139 +672,347 @@ with st.sidebar:
         
         st.markdown("---")
         
-        # Update Weight and Muscle Measurements Section
-        with st.expander("📏 Update Weight & Measurements", expanded=False):
-            st.markdown("### Update Weight")
-            with st.form("update_weight_form"):
-                new_weight_lbs = st.number_input(
-                    "Weight (lbs)",
-                    min_value=66.0,
-                    max_value=440.0,
-                    value=float(user_data.get('weight_lbs', 154)),
-                    step=0.1,
-                    key="update_weight"
-                )
-                update_weight_button = st.form_submit_button("💾 Update Weight", use_container_width=True)
+        # Update Weight and Measurements Button - Navigate to update profile page
+        if st.button("📏 Update Weight & Measurements", use_container_width=True):
+            st.switch_page("pages/4_update_profile.py")
+        
+        # Visual Body Fat Percentage Estimator Section
+        st.markdown("---")
+        with st.expander("📊 Visual Body Fat Percentage Estimator", expanded=False):
+            # Display current body fat if available
+            if 'body_fat_percentage' in user_data:
+                current_bf = user_data['body_fat_percentage']
+                category, color = get_body_fat_category(current_bf, user_data.get('gender', 'Male'))
                 
-                if update_weight_button:
-                    # Convert weight to kg
-                    new_weight_kg = new_weight_lbs * 0.453592
-                    
-                    # Update user data
-                    updated_data = {
-                        'weight_lbs': round(new_weight_lbs, 1),
-                        'weight_kg': round(new_weight_kg, 2)
+                st.markdown(f"### Current Body Fat: {current_bf}%")
+                st.markdown(f"**Category:** <span style='color: {color}; font-weight: bold;'>{category}</span>", unsafe_allow_html=True)
+                
+                # Visual progress bar
+                if user_data.get('gender', 'Male').lower() in ['male', 'm']:
+                    max_range = 32
+                else:
+                    max_range = 38
+                
+                bf_progress = min(current_bf / max_range, 1.0)
+                st.progress(bf_progress)
+                
+                st.markdown("---")
+            
+            st.markdown("### Estimate Your Body Fat Percentage")
+            st.markdown("*Compare yourself visually to the descriptions below, or enter an estimate directly*")
+            
+            user_gender = user_data.get('gender', 'Male')
+            
+            # Visual reference guide
+            if user_gender.lower() in ['male', 'm']:
+                st.markdown("#### 👨 Male Body Fat Reference Guide")
+                body_fat_ranges_male = {
+                    "Essential Fat (3-5%)": {
+                        "range": (3, 5),
+                        "color": "#4CAF50",
+                        "description": "✅ Athletes at peak condition. Very defined muscle separation, vascularity visible. Minimal fat."
+                    },
+                    "Athletes (6-13%)": {
+                        "range": (6, 13),
+                        "color": "#8BC34A",
+                        "description": "✅ Excellent condition. Visible abs, good muscle definition. Low body fat."
+                    },
+                    "Fitness (14-17%)": {
+                        "range": (14, 17),
+                        "color": "#CDDC39",
+                        "description": "✅ Good shape. Some abs visible, slight fat layer. Athletic build."
+                    },
+                    "Average (18-24%)": {
+                        "range": (18, 24),
+                        "color": "#FFC107",
+                        "description": "⚠️ Normal range. Some fat, less muscle definition. Abs may not be visible."
+                    },
+                    "Obese (25-31%)": {
+                        "range": (25, 31),
+                        "color": "#FF9800",
+                        "description": "❌ Higher body fat. Noticeable fat deposits, less muscle definition."
+                    },
+                    "Very High (32%+)": {
+                        "range": (32, 50),
+                        "color": "#F44336",
+                        "description": "❌ High body fat. Significant fat deposits, minimal muscle visibility."
                     }
-                    
-                    if update_user_profile(st.session_state['user_email'], updated_data):
-                        st.success(f"✅ Weight updated to {new_weight_lbs} lbs!")
-                        st.rerun()
-                    else:
-                        st.error("❌ Failed to update weight. Please try again.")
+                }
+            else:
+                st.markdown("#### 👩 Female Body Fat Reference Guide")
+                body_fat_ranges_male = {
+                    "Essential Fat (10-13%)": {
+                        "range": (10, 13),
+                        "color": "#4CAF50",
+                        "description": "✅ Athletes at peak condition. Very defined muscles, minimal fat."
+                    },
+                    "Athletes (14-20%)": {
+                        "range": (14, 20),
+                        "color": "#8BC34A",
+                        "description": "✅ Excellent condition. Visible muscle definition, low body fat."
+                    },
+                    "Fitness (21-24%)": {
+                        "range": (21, 24),
+                        "color": "#CDDC39",
+                        "description": "✅ Good shape. Some muscle definition, slight fat layer."
+                    },
+                    "Average (25-31%)": {
+                        "range": (25, 31),
+                        "color": "#FFC107",
+                        "description": "⚠️ Normal range. Moderate fat, less muscle definition."
+                    },
+                    "Obese (32-37%)": {
+                        "range": (32, 37),
+                        "color": "#FF9800",
+                        "description": "❌ Higher body fat. Noticeable fat deposits."
+                    },
+                    "Very High (38%+)": {
+                        "range": (38, 50),
+                        "color": "#F44336",
+                        "description": "❌ High body fat. Significant fat deposits."
+                    }
+                }
+            
+            # Display reference guide
+            for category_name, info in body_fat_ranges_male.items():
+                low, high = info["range"]
+                st.markdown(
+                    f"""
+                    <div style='
+                        background: {info["color"]}20;
+                        border-left: 4px solid {info["color"]};
+                        padding: 10px;
+                        margin: 10px 0;
+                        border-radius: 5px;
+                    '>
+                        <strong style='color: {info["color"]};'>{category_name} ({low}-{high}%)</strong><br/>
+                        <small>{info["description"]}</small>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
             
             st.markdown("---")
-            st.markdown("### Update Muscle Measurements")
             
-            with st.form("update_muscles_form"):
-                # Initialize muscle measurements if they don't exist
-                if 'muscle_measurements' not in user_data:
-                    user_data['muscle_measurements'] = {}
-                
-                muscle_measurements = user_data.get('muscle_measurements', {})
-                
-                col1, col2 = st.columns(2)
-                with col1:
-                    chest = st.number_input(
-                        "Chest (inches)",
-                        min_value=20.0,
-                        max_value=60.0,
-                        value=float(muscle_measurements.get('chest', 38.0)),
-                        step=0.1,
-                        key="update_chest"
-                    )
-                    biceps_left = st.number_input(
-                        "Biceps Left (inches)",
-                        min_value=8.0,
-                        max_value=25.0,
-                        value=float(muscle_measurements.get('biceps_left', 12.0)),
-                        step=0.1,
-                        key="update_biceps_left"
-                    )
-                    waist = st.number_input(
-                        "Waist (inches)",
-                        min_value=20.0,
-                        max_value=60.0,
-                        value=float(muscle_measurements.get('waist', 32.0)),
-                        step=0.1,
-                        key="update_waist"
-                    )
-                    thigh_left = st.number_input(
-                        "Thigh Left (inches)",
-                        min_value=15.0,
-                        max_value=40.0,
-                        value=float(muscle_measurements.get('thigh_left', 22.0)),
-                        step=0.1,
-                        key="update_thigh_left"
-                    )
-                
-                with col2:
-                    shoulders = st.number_input(
-                        "Shoulders (inches)",
-                        min_value=30.0,
-                        max_value=60.0,
-                        value=float(muscle_measurements.get('shoulders', 42.0)),
-                        step=0.1,
-                        key="update_shoulders"
-                    )
-                    biceps_right = st.number_input(
-                        "Biceps Right (inches)",
-                        min_value=8.0,
-                        max_value=25.0,
-                        value=float(muscle_measurements.get('biceps_right', 12.0)),
-                        step=0.1,
-                        key="update_biceps_right"
-                    )
-                    hips = st.number_input(
-                        "Hips (inches)",
-                        min_value=25.0,
-                        max_value=55.0,
-                        value=float(muscle_measurements.get('hips', 36.0)),
-                        step=0.1,
-                        key="update_hips"
-                    )
-                    thigh_right = st.number_input(
-                        "Thigh Right (inches)",
-                        min_value=15.0,
-                        max_value=40.0,
-                        value=float(muscle_measurements.get('thigh_right', 22.0)),
-                        step=0.1,
-                        key="update_thigh_right"
-                    )
-                
-                update_muscles_button = st.form_submit_button("💾 Update Measurements", use_container_width=True)
-                
-                if update_muscles_button:
-                    # Update muscle measurements
-                    updated_measurements = {
-                        'chest': round(chest, 1),
-                        'shoulders': round(shoulders, 1),
-                        'biceps_left': round(biceps_left, 1),
-                        'biceps_right': round(biceps_right, 1),
-                        'waist': round(waist, 1),
-                        'hips': round(hips, 1),
-                        'thigh_left': round(thigh_left, 1),
-                        'thigh_right': round(thigh_right, 1)
+            estimation_method = st.radio(
+                "Estimation Method:",
+                ["Select from Visual Categories", "Enter Percentage Directly"],
+                key="bf_est_method"
+            )
+            
+            # Helper function to display visual chart
+            def display_body_fat_chart(body_fat, gender, category, color):
+                """Display visual body fat percentage chart."""
+                if gender.lower() in ['male', 'm']:
+                    max_range = 32
+                    categories_display = {
+                        "Essential Fat": (0, 6, "#4CAF50"),
+                        "Athletes": (6, 14, "#8BC34A"),
+                        "Fitness": (14, 18, "#CDDC39"),
+                        "Average": (18, 25, "#FFC107"),
+                        "Obese": (25, 32, "#FF9800"),
+                        "Very High": (32, 100, "#F44336")
                     }
-                    
-                    updated_data = {
-                        'muscle_measurements': updated_measurements
+                else:
+                    max_range = 38
+                    categories_display = {
+                        "Essential Fat": (0, 14, "#4CAF50"),
+                        "Athletes": (14, 21, "#8BC34A"),
+                        "Fitness": (21, 25, "#CDDC39"),
+                        "Average": (25, 32, "#FFC107"),
+                        "Obese": (32, 38, "#FF9800"),
+                        "Very High": (38, 100, "#F44336")
                     }
+                
+                # Visual bar chart - HTML/CSS based
+                html_chart = f"""
+                <div style='margin: 20px 0;'>
+                    <div style='position: relative; height: 80px; background: #f0f0f0; border-radius: 10px; overflow: hidden; border: 2px solid #ddd;'>
+                """
+                
+                x_pos = 0
+                for cat_name, (low, high, cat_color) in categories_display.items():
+                    width = high - low
+                    width_percent = (width / max_range) * 100
+                    left_percent = (x_pos / max_range) * 100
                     
-                    if update_user_profile(st.session_state['user_email'], updated_data):
-                        st.success("✅ Muscle measurements updated successfully!")
-                        st.rerun()
+                    is_current = body_fat >= low and body_fat < high
+                    opacity = 1.0 if is_current else 0.5
+                    
+                    html_chart += f"""
+                        <div style='
+                            position: absolute;
+                            left: {left_percent}%;
+                            width: {width_percent}%;
+                            height: 100%;
+                            background: {cat_color};
+                            opacity: {opacity};
+                            border-right: 2px solid rgba(0,0,0,0.1);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            text-align: center;
+                            font-size: 10px;
+                            font-weight: bold;
+                            color: {'white' if is_current else '#333'};
+                        '>
+                            <div style='padding: 5px;'>
+                                {cat_name}<br/>
+                                <small>({low}-{high}%)</small>
+                            </div>
+                        </div>
+                    """
+                    x_pos += width
+                
+                # Mark current position
+                marker_position = (body_fat / max_range) * 100
+                html_chart += f"""
+                        <div style='
+                            position: absolute;
+                            left: {marker_position}%;
+                            top: 50%;
+                            transform: translate(-50%, -50%);
+                            width: 20px;
+                            height: 20px;
+                            background: white;
+                            border: 3px solid #000;
+                            border-radius: 50%;
+                            z-index: 10;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                        '></div>
+                    </div>
+                    <div style='text-align: center; margin-top: 10px; font-weight: bold; color: #666;'>
+                        Body Fat Percentage: <span style='color: {color}; font-size: 1.2em;'>{body_fat}%</span>
+                    </div>
+                </div>
+                """
+                
+                st.markdown(html_chart, unsafe_allow_html=True)
+            
+            if estimation_method == "Select from Visual Categories":
+                with st.form("body_fat_category_form"):
+                    st.info("💡 Look at the reference guide above and select the category that best matches your current body appearance.")
+                    
+                    # Create category options based on gender
+                    if user_gender.lower() in ['male', 'm']:
+                        category_options = [
+                            "Essential Fat (3-5%)",
+                            "Athletes (6-13%)",
+                            "Fitness (14-17%)",
+                            "Average (18-24%)",
+                            "Obese (25-31%)",
+                            "Very High (32%+)"
+                        ]
+                        default_index = 3  # Average
                     else:
-                        st.error("❌ Failed to update measurements. Please try again.")
+                        category_options = [
+                            "Essential Fat (10-13%)",
+                            "Athletes (14-20%)",
+                            "Fitness (21-24%)",
+                            "Average (25-31%)",
+                            "Obese (32-37%)",
+                            "Very High (38%+)"
+                        ]
+                        default_index = 3  # Average
+                    
+                    # Pre-select current category if available
+                    current_bf = user_data.get('body_fat_percentage')
+                    if current_bf:
+                        for i, option in enumerate(category_options):
+                            # Extract range from option
+                            if user_gender.lower() in ['male', 'm']:
+                                ranges = [(3, 5), (6, 13), (14, 17), (18, 24), (25, 31), (32, 50)]
+                            else:
+                                ranges = [(10, 13), (14, 20), (21, 24), (25, 31), (32, 37), (38, 50)]
+                            
+                            low, high = ranges[i]
+                            if low <= current_bf <= high:
+                                default_index = i
+                                break
+                    
+                    selected_category = st.selectbox(
+                        "Select your body fat category:",
+                        category_options,
+                        index=default_index,
+                        key="bf_category_select"
+                    )
+                    
+                    estimate_button = st.form_submit_button("💾 Save Visual Estimate", use_container_width=True)
+                    
+                    if estimate_button:
+                        # Extract body fat percentage from selected category
+                        if user_gender.lower() in ['male', 'm']:
+                            category_to_range = {
+                                "Essential Fat (3-5%)": (3, 5),
+                                "Athletes (6-13%)": (6, 13),
+                                "Fitness (14-17%)": (14, 17),
+                                "Average (18-24%)": (18, 24),
+                                "Obese (25-31%)": (25, 31),
+                                "Very High (32%+)": (32, 50)
+                            }
+                        else:
+                            category_to_range = {
+                                "Essential Fat (10-13%)": (10, 13),
+                                "Athletes (14-20%)": (14, 20),
+                                "Fitness (21-24%)": (21, 24),
+                                "Average (25-31%)": (25, 31),
+                                "Obese (32-37%)": (32, 37),
+                                "Very High (38%+)": (38, 50)
+                            }
+                        
+                        low, high = category_to_range[selected_category]
+                        # Use middle of the range as estimate
+                        body_fat = round((low + high) / 2, 1)
+                        category, color = get_body_fat_category(body_fat, user_gender)
+                        
+                        # Save to user profile
+                        updated_data = {'body_fat_percentage': body_fat}
+                        if update_user_profile(st.session_state['user_email'], updated_data):
+                            st.success(f"✅ Body Fat Percentage estimated: **{body_fat}%**")
+                            st.markdown(f"**Category:** <span style='color: {color}; font-weight: bold;'>{category}</span>", unsafe_allow_html=True)
+                            
+                            # Display visual chart
+                            display_body_fat_chart(body_fat, user_gender, category, color)
+                            
+                            st.rerun()
+                        else:
+                            st.error("❌ Failed to save estimate. Please try again.")
+            
+            else:  # Enter Percentage Directly
+                with st.form("body_fat_direct_form"):
+                    st.info("💡 Enter your estimated body fat percentage directly (based on visual appearance or previous measurements).")
+                    
+                    # Get current body fat or default
+                    current_bf = user_data.get('body_fat_percentage', 20.0)
+                    
+                    body_fat_input = st.number_input(
+                        "Body Fat Percentage (%)",
+                        min_value=3.0,
+                        max_value=50.0,
+                        value=float(current_bf),
+                        step=0.1,
+                        help="Enter your estimated body fat percentage (3-50%)",
+                        key="bf_direct_input"
+                    )
+                    
+                    estimate_button = st.form_submit_button("💾 Save Estimate", use_container_width=True)
+                    
+                    if estimate_button:
+                        body_fat = round(body_fat_input, 1)
+                        category, color = get_body_fat_category(body_fat, user_gender)
+                        
+                        # Save to user profile
+                        updated_data = {'body_fat_percentage': body_fat}
+                        if update_user_profile(st.session_state['user_email'], updated_data):
+                            st.success(f"✅ Body Fat Percentage saved: **{body_fat}%**")
+                            st.markdown(f"**Category:** <span style='color: {color}; font-weight: bold;'>{category}</span>", unsafe_allow_html=True)
+                            
+                            # Display visual chart
+                            display_body_fat_chart(body_fat, user_gender, category, color)
+                            
+                            st.rerun()
+                        else:
+                            st.error("❌ Failed to save estimate. Please try again.")
         
         st.markdown("---")
     
@@ -770,6 +1057,12 @@ with st.sidebar:
     # Workout Plan Generator Buttons in Sidebar
     st.markdown("### 🏋️ Workout Plans")
     st.markdown("*Click to generate workout routines*")
+    
+    # Custom workout button - Navigate to custom workout page
+    if st.button("✨ Custom workout for U", use_container_width=True):
+        st.switch_page("pages/5_custom_workout.py")
+    
+    st.markdown("---")
     
     # Quick workout plan buttons
     with st.expander("💪 Basic Workouts", expanded=True):
@@ -996,11 +1289,18 @@ if st.session_state["messages"]:
 user_input = None
 if "pre_filled_question" in st.session_state and st.session_state["pre_filled_question"]:
     user_input = st.session_state["pre_filled_question"]
+    is_custom_workout = st.session_state.get("custom_workout_request", False)
     st.session_state["pre_filled_question"] = None  # Clear after use
     st.session_state["prefilled_triggered"] = True  # Flag to track pre-filled question
     
-    # Add user message to session state first (this will show in chat immediately after rerun)
-    st.session_state["messages"].append({"role": "user", "content": user_input})
+    # Store the actual prompt for AI (even if we show a different message to user)
+    if is_custom_workout:
+        # Store actual prompt for AI, but show friendly message to user
+        st.session_state["actual_ai_prompt"] = user_input  # Store the real prompt
+        st.session_state["messages"].append({"role": "user", "content": "🤔 MyGymBro is thinking..."})
+        st.session_state["custom_workout_request"] = False  # Clear flag
+    else:
+        st.session_state["messages"].append({"role": "user", "content": user_input})
     
     # Force rerun to show the user message in chat first
     st.rerun()
@@ -1013,8 +1313,12 @@ elif user_input := st.chat_input(get_text("chat_placeholder")):
 
 # Generate AI response if there's a user message without an assistant response
 if st.session_state["messages"] and st.session_state["messages"][-1]["role"] == "user":
-    # Get the last user message
-    last_user_message = st.session_state["messages"][-1]["content"]
+    # Get the last user message - use actual prompt if it's a custom workout
+    if "actual_ai_prompt" in st.session_state:
+        last_user_message = st.session_state["actual_ai_prompt"]
+        del st.session_state["actual_ai_prompt"]  # Clear after use
+    else:
+        last_user_message = st.session_state["messages"][-1]["content"]
     
     # Create a placeholder for the assistant message
     with st.chat_message("assistant"):

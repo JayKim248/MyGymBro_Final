@@ -1,9 +1,13 @@
 import streamlit as st
 from pathlib import Path
 
+# Get user data first for page title
+user_data_for_title = st.session_state.get("user_data", {})
+user_first_name = user_data_for_title.get("first_name", "U")
+
 # Page configuration
 st.set_page_config(
-    page_title="MyGymBro - Custom Workout for U",
+    page_title=f"MyGymBro - Custom Workout for {user_first_name}",
     page_icon="💪",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -69,7 +73,8 @@ exercise_frequency = user_data.get("exercise_frequency", "3x/week")
 sports_activities = user_data.get("sports_activities", [])
 
 # Main UI
-st.markdown('<h1 class="main-header">✨ Custom Workout for U</h1>', unsafe_allow_html=True)
+user_first_name = user_data.get("first_name", "U")
+st.markdown(f'<h1 class="main-header">✨ Custom Workout for {user_first_name}</h1>', unsafe_allow_html=True)
 st.markdown('<h2 style="text-align: center; color: #666;">Tell us about your ideal workout</h2>', unsafe_allow_html=True)
 
 # Progress bar

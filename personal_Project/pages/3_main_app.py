@@ -1059,7 +1059,8 @@ with st.sidebar:
     st.markdown("*Click to generate workout routines*")
     
     # Custom workout button - Navigate to custom workout page
-    if st.button("✨ Custom workout for U", use_container_width=True):
+    user_first_name = user_data.get("first_name", "U")
+    if st.button(f"✨ Custom workout for {user_first_name}", use_container_width=True):
         st.switch_page("pages/5_custom_workout.py")
     
     st.markdown("---")

@@ -75,8 +75,11 @@ try:
 except ImportError:
     MATPLOTLIB_AVAILABLE = False
 
-# Load environment variables
-load_dotenv()
+# Environment mode: default prod so .env is always loaded unless explicitly set to local
+APP_ENV = os.getenv("APP_ENV", "prod").lower()
+
+# Always load .env (publishing/default). Local can still override via APP_ENV=local.
+load_dotenv(".env")
 
 # Page configuration
 st.set_page_config(
@@ -818,8 +821,13 @@ def get_ai_response_stream(question, prompt_type):
     import ssl
     import httpx
     
-    # Check if API key is set
-    api_key = os.environ.get('OPENAI_API_KEY')
+    # Choose API key source based on environment
+    if APP_ENV == "local":
+        # Local: use OPENAI_API_KEY_LOCAL if provided, else fallback to OPENAI_API_KEY
+        api_key = os.environ.get('OPENAI_API_KEY_LOCAL') or os.environ.get('OPENAI_API_KEY')
+    else:
+        # Default/prod: use OPENAI_API_KEY from .env (loaded above)
+        api_key = os.environ.get('OPENAI_API_KEY')
     if not api_key or api_key == 'your_api_key_here':
         error_msg = (
             "⚠️ **OpenAI API Key Not Configured**\n\n"

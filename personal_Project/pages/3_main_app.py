@@ -66,6 +66,7 @@ from pathlib import Path
 import os
 from openai import OpenAI
 import pandas as pd
+import re
 
 # Try to import matplotlib, but make it optional
 try:
@@ -106,6 +107,25 @@ st.markdown("""
     }
     .stChatMessage {
         margin-bottom: 1rem;
+    }
+    .workout-block {
+        background: white;
+        border: 2px solid #4ecdc4;
+        border-radius: 10px;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .workout-block:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    .workout-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -584,16 +604,250 @@ def get_body_fat_category(body_fat, gender):
             return category, color
     return "Unknown", "#9E9E9E"
 
+def parse_workout_exercises(text):
+    """Parse workout text to extract individual exercises."""
+    exercises = []
+    lines = text.split('\n')
+    current_exercise = None
+    current_description = []
+    
+    # Patterns to match exercise numbers (1., 2., First, Second, etc.)
+    exercise_patterns = [
+        r'^\d+[\.\)]\s*(.+?)(?:\s*[-–—]|$)',  # 1. Exercise Name or 1) Exercise Name
+        r'^(?:First|Second|Third|Fourth|Fifth|Sixth|Seventh|Eighth|Ninth|Tenth)\s*[:\-]?\s*(.+?)(?:\s*[-–—]|$)',  # First: Exercise Name
+        r'^Exercise\s+\d+[:\-]?\s*(.+?)(?:\s*[-–—]|$)',  # Exercise 1: Exercise Name
+    ]
+    
+    # Skip intro sections (warm-up, introduction, etc.)
+    skip_sections = ['warm-up', 'warmup', 'introduction', 'overview', 'summary', 'cool-down', 'cooldown']
+    
+    for i, line in enumerate(lines):
+        line = line.strip()
+        if not line:
+            # Empty line might separate exercises
+            if current_exercise and current_description:
+                # Don't add empty line, but continue collecting
+                continue
+            continue
+        
+        # Skip section headers
+        line_lower = line.lower()
+        if any(section in line_lower for section in skip_sections) and len(line) < 50:
+            # Reset current exercise if we hit a section header
+            if current_exercise:
+                exercises.append({
+                    'name': current_exercise,
+                    'description': '\n'.join(current_description).strip()
+                })
+                current_exercise = None
+                current_description = []
+            continue
+        
+        # Check if this line starts a new exercise
+        is_exercise_start = False
+        exercise_name = None
+        
+        for pattern in exercise_patterns:
+            match = re.match(pattern, line, re.IGNORECASE)
+            if match:
+                exercise_name = match.group(1).strip()
+                # Clean up exercise name (remove extra punctuation)
+                exercise_name = re.sub(r'^[-–—\s]+|[-–—\s]+$', '', exercise_name)
+                if exercise_name:
+                    is_exercise_start = True
+                    break
+        
+        # Also check for bold text (markdown format)
+        if not is_exercise_start:
+            bold_match = re.match(r'^\*\*(.+?)\*\*', line)
+            if bold_match:
+                potential_name = bold_match.group(1).strip()
+                # Check if it looks like an exercise name (not too long, not a full sentence)
+                if len(potential_name) < 80 and ':' not in potential_name:
+                    exercise_name = potential_name
+                    is_exercise_start = True
+        
+        # Check for lines that start with common exercise patterns
+        if not is_exercise_start:
+            # Look for lines that might be exercise names (short, capitalized, contain exercise keywords)
+            exercise_keywords = ['squat', 'press', 'curl', 'row', 'pull', 'push', 'deadlift', 'lunge', 'plank', 'crunch', 'bench', 'fly', 'extension', 'raise', 'dip']
+            if len(line) < 80 and any(keyword in line_lower for keyword in exercise_keywords):
+                # Check if it's likely an exercise name (starts with capital, short, no colon in middle)
+                if line[0].isupper() and line.count(':') <= 1:
+                    parts = line.split(':', 1)
+                    if len(parts) == 1 or (len(parts) == 2 and len(parts[0]) < 60):
+                        exercise_name = parts[0].strip()
+                        is_exercise_start = True
+        
+        if is_exercise_start and exercise_name:
+            # Save previous exercise if exists
+            if current_exercise:
+                exercises.append({
+                    'name': current_exercise,
+                    'description': '\n'.join(current_description).strip()
+                })
+            
+            # Start new exercise
+            current_exercise = exercise_name
+            current_description = []
+            # Add the rest of the line as description if it contains more info
+            if ':' in line:
+                remaining = line.split(':', 1)[1].strip()
+                if remaining:
+                    current_description.append(remaining)
+        else:
+            # Add to current exercise description
+            if current_exercise:
+                # Skip if this looks like the start of a new section
+                if not (line_lower.startswith('workout') or line_lower.startswith('day') or 
+                        any(section in line_lower for section in skip_sections)):
+                    current_description.append(line)
+            elif not exercises:  # If no exercise found yet, might be intro text
+                pass
+    
+    # Add last exercise
+    if current_exercise:
+        exercises.append({
+            'name': current_exercise,
+            'description': '\n'.join(current_description).strip()
+        })
+    
+    # If no exercises found with patterns, try alternative parsing
+    if not exercises:
+        # Look for numbered list items
+        for i, line in enumerate(lines):
+            line = line.strip()
+            if re.match(r'^\d+[\.\)]\s+', line):
+                # Extract exercise name
+                exercise_name = re.sub(r'^\d+[\.\)]\s+', '', line).strip()
+                # Get description from next few lines
+                desc_lines = []
+                for j in range(i+1, min(i+6, len(lines))):
+                    next_line = lines[j].strip()
+                    if next_line and not re.match(r'^\d+[\.\)]\s+', next_line):
+                        desc_lines.append(next_line)
+                    else:
+                        break
+                if exercise_name:
+                    exercises.append({
+                        'name': exercise_name,
+                        'description': '\n'.join(desc_lines).strip()
+                    })
+    
+    # Filter out exercises with very short or invalid names
+    exercises = [ex for ex in exercises if ex['name'] and len(ex['name']) > 2]
+    
+    return exercises
+
+def display_workout_blocks(response_text):
+    """Display workout in block/spreadsheet style with clickable buttons."""
+    exercises = parse_workout_exercises(response_text)
+    
+    if not exercises:
+        # If parsing failed, display as regular text
+        return False
+    
+    # Display workout blocks
+    st.markdown("### 💪 Your Workout Plan")
+    st.markdown("*Click on each workout block to see detailed instructions*")
+    st.markdown("---")
+    
+    # Create a grid layout for workout blocks
+    num_exercises = len(exercises)
+    cols_per_row = 3
+    
+    for i in range(0, num_exercises, cols_per_row):
+        cols = st.columns(cols_per_row)
+        for j, col in enumerate(cols):
+            if i + j < num_exercises:
+                exercise = exercises[i + j]
+                exercise_num = i + j + 1
+                
+                with col:
+                    # Create workout block button
+                    ordinal = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth"][exercise_num - 1] if exercise_num <= 10 else f"{exercise_num}th"
+                    
+                    # Truncate exercise name for display
+                    display_name = exercise['name'][:35] + "..." if len(exercise['name']) > 35 else exercise['name']
+                    
+                    # Use expander for each workout block
+                    with st.expander(f"🏋️ {ordinal} Workout: {display_name}", expanded=False):
+                        st.markdown(f"### {exercise['name']}")
+                        st.markdown("---")
+                        
+                        # Try to extract sets/reps, form tips, etc. from description
+                        desc_text = exercise['description'].lower() if exercise['description'] else ""
+                        
+                        # Look for sets/reps pattern
+                        sets_reps_match = re.search(r'(\d+)\s*(?:sets?|x)\s*(?:of\s*)?(\d+)', desc_text)
+                        if sets_reps_match:
+                            st.markdown(f"**📊 Sets/Reps:** {sets_reps_match.group(1)} sets x {sets_reps_match.group(2)} reps")
+                        
+                        # Look for rest period
+                        rest_match = re.search(r'rest[:\s]+(\d+[-\s]?\d*)\s*(?:seconds?|sec|minutes?|min)', desc_text)
+                        if rest_match:
+                            st.markdown(f"**⏱️ Rest:** {rest_match.group(1)}")
+                        
+                        # Look for weight information
+                        weight_match = re.search(r'(\d+[-\s]?\d*)\s*(?:lbs?|kg|pounds?|kilograms?)', desc_text)
+                        if weight_match:
+                            st.markdown(f"**🏋️ Weight:** {weight_match.group(1)}")
+                        
+                        # Display description
+                        if exercise['description']:
+                            st.markdown("---")
+                            st.markdown("#### 📝 Description & Instructions")
+                            st.markdown(exercise['description'])
+                            
+                            # Try to extract form tips
+                            form_keywords = ['form', 'technique', 'posture', 'position', 'keep', 'maintain', 'avoid']
+                            if any(keyword in desc_text for keyword in form_keywords):
+                                st.markdown("---")
+                                st.markdown("#### ✅ Proper Form Tips")
+                                # Extract sentences with form-related keywords
+                                sentences = exercise['description'].split('.')
+                                form_sentences = [s.strip() + '.' for s in sentences if any(keyword in s.lower() for keyword in form_keywords)]
+                                if form_sentences:
+                                    for tip in form_sentences[:3]:  # Show up to 3 form tips
+                                        st.markdown(f"• {tip}")
+    
+    return True
+
 # AI response function - returns a generator for streaming
 def get_ai_response_stream(question, prompt_type):
     import ssl
     import httpx
     
+    # Check if API key is set
+    api_key = os.environ.get('OPENAI_API_KEY')
+    if not api_key or api_key == 'your_api_key_here':
+        error_msg = (
+            "⚠️ **OpenAI API Key Not Configured**\n\n"
+            "To use MyGymBro's AI features, you need to set up your OpenAI API key:\n\n"
+            "**Option 1: Create a .env file**\n"
+            "1. Create a file named `.env` in the project root\n"
+            "2. Add this line: `OPENAI_API_KEY=your_actual_api_key_here`\n"
+            "3. Get your API key from: https://platform.openai.com/api-keys\n\n"
+            "**Option 2: Set environment variable**\n"
+            "Run: `export OPENAI_API_KEY=your_actual_api_key_here`\n\n"
+            "After setting up, restart the Streamlit app."
+        )
+        yield error_msg
+        return
+    
+    # Strip whitespace from API key
+    api_key = api_key.strip()
+    
     # Create client with SSL verification disabled for problematic networks
-    client = OpenAI(
-        api_key=os.environ.get('OPENAI_API_KEY'),
-        http_client=httpx.Client(verify=False)
-    )
+    try:
+        client = OpenAI(
+            api_key=api_key,
+            http_client=httpx.Client(verify=False)
+        )
+    except Exception as e:
+        error_msg = f"⚠️ **Error initializing OpenAI client:** {str(e)}"
+        yield error_msg
+        return
     
     # Get equipment information
     equipment_info = get_equipment_summary()
@@ -603,32 +857,48 @@ def get_ai_response_stream(question, prompt_type):
     
     # Language-specific system prompts (controlled from backend)
     system_prompts = {
-        "English": f"You are MyGymBro's AI workout planner for students. Your PRIMARY function is to create detailed, practical workout routines using ONLY the available gym equipment. Focus on creating complete workout plans with specific exercises, sets, reps, and rest periods.\n\nAvailable gym equipment:\n{equipment_info}\n\nWhen creating workout routines:\n- Use ONLY the equipment listed above\n- Provide specific sets, reps, and rest periods\n- Include proper warm-up and cool-down\n- Consider the user's fitness level and experience\n- Make routines practical for students with limited time\n- Explain proper form for each exercise\n- Suggest weight ranges based on available equipment\n\nFor weekly workout splits:\n- Plan out each day of the week (Monday-Sunday)\n- Include rest days for recovery\n- Balance muscle groups throughout the week\n- Consider the user's exercise frequency\n- Provide progression recommendations\n- Include variety to prevent boredom\n\nFor sports-specific training:\n- Consider the user's sports/activities when creating workouts\n- Include sport-specific exercises and movements\n- Balance gym training with sport performance\n- Focus on injury prevention for their specific sports\n- Suggest complementary exercises that enhance sport performance\n\nYou can also provide basic nutrition advice and calorie calculations when asked. Respond in English.",
-        "French": f"Vous êtes le planificateur d'entraînements IA de MyGymBro pour les étudiants. Votre FONCTION PRINCIPALE est de créer des routines d'entraînement détaillées et pratiques en utilisant UNIQUEMENT l'équipement de gym disponible. Concentrez-vous sur la création de plans d'entraînement complets avec des exercices spécifiques, des séries, des répétitions et des périodes de repos.\n\nÉquipement de gym disponible:\n{equipment_info}\n\nLors de la création de routines d'entraînement:\n- Utilisez UNIQUEMENT l'équipement listé ci-dessus\n- Fournissez des séries, répétitions et périodes de repos spécifiques\n- Incluez un échauffement et une récupération appropriés\n- Considérez le niveau de forme et l'expérience de l'utilisateur\n- Rendez les routines pratiques pour les étudiants avec un temps limité\n- Expliquez la forme appropriée pour chaque exercice\n- Suggérez des plages de poids basées sur l'équipement disponible\n\nPour les splits d'entraînement hebdomadaires:\n- Planifiez chaque jour de la semaine (lundi-dimanche)\n- Incluez des jours de repos pour la récupération\n- Équilibrez les groupes musculaires tout au long de la semaine\n- Considérez la fréquence d'exercice de l'utilisateur\n- Fournissez des recommandations de progression\n- Incluez de la variété pour éviter l'ennui\n\nVous pouvez aussi fournir des conseils nutritionnels de base et des calculs de calories quand demandé. Répondez en français.",
-        "Korean": f"당신은 MyGymBro의 학생용 AI 운동 계획자입니다. 당신의 주요 기능은 사용 가능한 짐 기구만을 사용하여 상세하고 실용적인 운동 루틴을 만드는 것입니다. 구체적인 운동, 세트, 반복 횟수, 휴식 시간이 포함된 완전한 운동 계획을 만드는 데 집중하세요.\n\n사용 가능한 짐 기구:\n{equipment_info}\n\n운동 루틴을 만들 때:\n- 위에 나열된 기구만 사용하세요\n- 구체적인 세트, 반복 횟수, 휴식 시간을 제공하세요\n- 적절한 워밍업과 쿨다운을 포함하세요\n- 사용자의 체력 수준과 경험을 고려하세요\n- 시간이 제한된 학생들에게 실용적인 루틴을 만드세요\n- 각 운동의 올바른 자세를 설명하세요\n- 사용 가능한 기구를 바탕으로 무게 범위를 제안하세요\n\n요청받을 때 기본적인 영양 조언과 칼로리 계산도 제공할 수 있습니다. 한국어로 답변해주세요.",
-        "Mandarin": f"你是MyGymBro的学生AI健身计划制定者。你的主要功能是仅使用可用的健身房设备创建详细、实用的锻炼计划。专注于创建包含具体练习、组数、次数和休息时间的完整锻炼计划。\n\n可用健身房设备：\n{equipment_info}\n\n制定锻炼计划时：\n- 仅使用上述列出的设备\n- 提供具体的组数、次数和休息时间\n- 包括适当的热身和冷却\n- 考虑用户的健身水平和经验\n- 为时间有限的学生制定实用的计划\n- 解释每个练习的正确姿势\n- 根据可用设备建议重量范围\n\n被询问时也可以提供基本营养建议和卡路里计算。请用中文回答。",
-        "Spanish": f"Eres el planificador de entrenamientos IA de MyGymBro para estudiantes. Tu FUNCIÓN PRINCIPAL es crear rutinas de entrenamiento detalladas y prácticas usando ÚNICAMENTE el equipamiento de gimnasio disponible. Enfócate en crear planes de entrenamiento completos con ejercicios específicos, series, repeticiones y períodos de descanso.\n\nEquipamiento de gimnasio disponible:\n{equipment_info}\n\nAl crear rutinas de entrenamiento:\n- Usa ÚNICAMENTE el equipamiento listado arriba\n- Proporciona series, repeticiones y períodos de descanso específicos\n- Incluye calentamiento y enfriamiento apropiados\n- Considera el nivel de fitness y experiencia del usuario\n- Haz rutinas prácticas para estudiantes con tiempo limitado\n- Explica la forma correcta para cada ejercicio\n- Sugiere rangos de peso basados en el equipamiento disponible\n\nTambién puedes proporcionar consejos nutricionales básicos y cálculos de calorías cuando se te pida. Responde en español."
+        "English": f"You are MyGymBro's AI workout planner for students. Your PRIMARY function is to create detailed, practical workout routines using ONLY the available gym equipment. Focus on creating complete workout plans with specific exercises, sets, reps, and rest periods.\n\nAvailable gym equipment:\n{equipment_info}\n\nWhen creating workout routines:\n- Use ONLY the equipment listed above\n- Provide specific sets, reps, and rest periods\n- Include proper warm-up and cool-down\n- Consider the user's fitness level and experience\n- Make routines practical for students with limited time\n- Explain proper form for each exercise\n- Suggest weight ranges based on available equipment\n- IMPORTANT: Format exercises clearly with numbered format (1. Exercise Name, 2. Exercise Name, etc.)\n- For each exercise, provide: name, sets/reps, description, how to perform it, and proper form tips\n\nFor weekly workout splits:\n- Plan out each day of the week (Monday-Sunday)\n- Include rest days for recovery\n- Balance muscle groups throughout the week\n- Consider the user's exercise frequency\n- Provide progression recommendations\n- Include variety to prevent boredom\n\nFor sports-specific training:\n- Consider the user's sports/activities when creating workouts\n- Include sport-specific exercises and movements\n- Balance gym training with sport performance\n- Focus on injury prevention for their specific sports\n- Suggest complementary exercises that enhance sport performance\n\nYou can also provide basic nutrition advice and calorie calculations when asked. Respond in English.",
+        "French": f"Vous êtes le planificateur d'entraînements IA de MyGymBro pour les étudiants. Votre FONCTION PRINCIPALE est de créer des routines d'entraînement détaillées et pratiques en utilisant UNIQUEMENT l'équipement de gym disponible. Concentrez-vous sur la création de plans d'entraînement complets avec des exercices spécifiques, des séries, des répétitions et des périodes de repos.\n\nÉquipement de gym disponible:\n{equipment_info}\n\nLors de la création de routines d'entraînement:\n- Utilisez UNIQUEMENT l'équipement listé ci-dessus\n- Fournissez des séries, répétitions et périodes de repos spécifiques\n- Incluez un échauffement et une récupération appropriés\n- Considérez le niveau de forme et l'expérience de l'utilisateur\n- Rendez les routines pratiques pour les étudiants avec un temps limité\n- Expliquez la forme appropriée pour chaque exercice\n- Suggérez des plages de poids basées sur l'équipement disponible\n- IMPORTANT: Formatez les exercices clairement avec un format numéroté (1. Nom de l'exercice, 2. Nom de l'exercice, etc.)\n- Pour chaque exercice, fournissez: nom, séries/reps, description, comment l'effectuer, et conseils de forme appropriée\n\nPour les splits d'entraînement hebdomadaires:\n- Planifiez chaque jour de la semaine (lundi-dimanche)\n- Incluez des jours de repos pour la récupération\n- Équilibrez les groupes musculaires tout au long de la semaine\n- Considérez la fréquence d'exercice de l'utilisateur\n- Fournissez des recommandations de progression\n- Incluez de la variété pour éviter l'ennui\n\nVous pouvez aussi fournir des conseils nutritionnels de base et des calculs de calories quand demandé. Répondez en français.",
+        "Korean": f"당신은 MyGymBro의 학생용 AI 운동 계획자입니다. 당신의 주요 기능은 사용 가능한 짐 기구만을 사용하여 상세하고 실용적인 운동 루틴을 만드는 것입니다. 구체적인 운동, 세트, 반복 횟수, 휴식 시간이 포함된 완전한 운동 계획을 만드는 데 집중하세요.\n\n사용 가능한 짐 기구:\n{equipment_info}\n\n운동 루틴을 만들 때:\n- 위에 나열된 기구만 사용하세요\n- 구체적인 세트, 반복 횟수, 휴식 시간을 제공하세요\n- 적절한 워밍업과 쿨다운을 포함하세요\n- 사용자의 체력 수준과 경험을 고려하세요\n- 시간이 제한된 학생들에게 실용적인 루틴을 만드세요\n- 각 운동의 올바른 자세를 설명하세요\n- 사용 가능한 기구를 바탕으로 무게 범위를 제안하세요\n- 중요: 운동을 명확하게 번호 형식으로 작성하세요 (1. 운동 이름, 2. 운동 이름 등)\n- 각 운동에 대해 제공: 이름, 세트/반복, 설명, 수행 방법, 올바른 자세 팁\n\n요청받을 때 기본적인 영양 조언과 칼로리 계산도 제공할 수 있습니다. 한국어로 답변해주세요.",
+        "Mandarin": f"你是MyGymBro的学生AI健身计划制定者。你的主要功能是仅使用可用的健身房设备创建详细、实用的锻炼计划。专注于创建包含具体练习、组数、次数和休息时间的完整锻炼计划。\n\n可用健身房设备：\n{equipment_info}\n\n制定锻炼计划时：\n- 仅使用上述列出的设备\n- 提供具体的组数、次数和休息时间\n- 包括适当的热身和冷却\n- 考虑用户的健身水平和经验\n- 为时间有限的学生制定实用的计划\n- 解释每个练习的正确姿势\n- 根据可用设备建议重量范围\n- 重要：使用编号格式清楚地格式化练习（1. 练习名称，2. 练习名称等）\n- 对于每个练习，提供：名称、组数/次数、描述、如何执行以及正确的姿势提示\n\n被询问时也可以提供基本营养建议和卡路里计算。请用中文回答。",
+        "Spanish": f"Eres el planificador de entrenamientos IA de MyGymBro para estudiantes. Tu FUNCIÓN PRINCIPAL es crear rutinas de entrenamiento detalladas y prácticas usando ÚNICAMENTE el equipamiento de gimnasio disponible. Enfócate en crear planes de entrenamiento completos con ejercicios específicos, series, repeticiones y períodos de descanso.\n\nEquipamiento de gimnasio disponible:\n{equipment_info}\n\nAl crear rutinas de entrenamiento:\n- Usa ÚNICAMENTE el equipamiento listado arriba\n- Proporciona series, repeticiones y períodos de descanso específicos\n- Incluye calentamiento y enfriamiento apropiados\n- Considera el nivel de fitness y experiencia del usuario\n- Haz rutinas prácticas para estudiantes con tiempo limitado\n- Explica la forma correcta para cada ejercicio\n- Sugiere rangos de peso basados en el equipamiento disponible\n- IMPORTANTE: Formatea los ejercicios claramente con formato numerado (1. Nombre del ejercicio, 2. Nombre del ejercicio, etc.)\n- Para cada ejercicio, proporciona: nombre, series/repeticiones, descripción, cómo realizarlo y consejos de forma apropiada\n\nTambién puedes proporcionar consejos nutricionales básicos y cálculos de calorías cuando se te pida. Responde en español."
     }
     
     system_prompt = system_prompts.get(current_language, system_prompts["English"])
     
-    # Use streaming API
-    stream = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": question}
-        ],
-        temperature=0.4,
-        max_tokens=1000,
-        stream=True  # Enable streaming
-    )
-    
-    # Generator function that yields tokens as they arrive
-    for chunk in stream:
-        if chunk.choices[0].delta.content is not None:
-            content = chunk.choices[0].delta.content
-            yield content
+    # Use streaming API with error handling
+    try:
+        stream = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": question}
+            ],
+            temperature=0.4,
+            max_tokens=1000,
+            stream=True  # Enable streaming
+        )
+        
+        # Generator function that yields tokens as they arrive
+        for chunk in stream:
+            if chunk.choices[0].delta.content is not None:
+                content = chunk.choices[0].delta.content
+                yield content
+    except Exception as e:
+        error_type = type(e).__name__
+        if "AuthenticationError" in error_type or "401" in str(e) or "invalid_api_key" in str(e):
+            # Mark error state
+            st.session_state["api_key_error"] = True
+            # Show minimal error message
+            error_msg = (
+                "⚠️ **Unable to connect to OpenAI**\n\n"
+                "Please verify your API key is correct and active. "
+                "Update your `.env` file and restart Streamlit if needed."
+            )
+            yield error_msg
+        else:
+            error_msg = f"⚠️ **Error:** {str(e)[:200]}"
+            yield error_msg
 
 # Check authentication
 check_authentication()
@@ -1280,7 +1550,37 @@ st.markdown("---")
 
 # Display chat messages
 for message in st.session_state["messages"]:
-    st.chat_message(message["role"]).write(message["content"])
+    with st.chat_message(message["role"]):
+        # Check if this is an assistant message that might contain a workout
+        if message["role"] == "assistant":
+            content = message["content"]
+            # Check if content looks like a workout (contains exercise-related keywords)
+            workout_keywords = ['workout', 'exercise', 'routine', 'sets', 'reps', 'squat', 'press', 'deadlift', 'bench']
+            is_workout = any(keyword in content.lower() for keyword in workout_keywords)
+            
+            if is_workout:
+                # Try to display as workout blocks
+                displayed_as_blocks = display_workout_blocks(content)
+                if not displayed_as_blocks:
+                    # If parsing failed, display as regular text
+                    st.write(content)
+            else:
+                # Not a workout, display as regular text
+                st.write(content)
+        else:
+            # User message, display normally
+            st.write(message["content"])
+
+# Show API key error warning (dismissible)
+if st.session_state.get("api_key_error", False) and not st.session_state.get("api_error_dismissed", False):
+    with st.container():
+        col1, col2 = st.columns([5, 1])
+        with col1:
+            st.warning("⚠️ API Key Issue: Your OpenAI API key appears invalid. Please check your `.env` file and restart Streamlit.")
+        with col2:
+            if st.button("Dismiss", key="dismiss_api_error"):
+                st.session_state["api_error_dismissed"] = True
+                st.rerun()
 
 # Show helpful message if there are messages
 if st.session_state["messages"]:

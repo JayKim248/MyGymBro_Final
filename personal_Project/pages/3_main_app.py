@@ -21,7 +21,7 @@ Main Application Page
 3. UI 레이아웃 재구성 (UI Layout Restructuring)
    - 버튼 메뉴를 메인 영역에서 사이드바로 이동
    - 사이드바에 expander를 사용하여 카테고리별로 정리:
-     * 💪 Basic Workouts (기본 열림)
+     * 💪  (기본 열림)
      * 🎯 Advanced Workouts (기본 닫힘)
      * 😂 Fun & Meme Workouts (기본 닫힘)
      * 👑 Clash Royale Themed (특정 사용자용, 기본 닫힘)
@@ -755,64 +755,58 @@ def display_workout_blocks(response_text):
     st.markdown("*Click on each workout block to see detailed instructions*")
     st.markdown("---")
     
-    # Create a grid layout for workout blocks
+    # Display workout blocks in a single column (1 per row)
     num_exercises = len(exercises)
-    cols_per_row = 3
     
-    for i in range(0, num_exercises, cols_per_row):
-        cols = st.columns(cols_per_row)
-        for j, col in enumerate(cols):
-            if i + j < num_exercises:
-                exercise = exercises[i + j]
-                exercise_num = i + j + 1
+    for i, exercise in enumerate(exercises):
+        exercise_num = i + 1
+        
+        # Create workout block button
+        ordinal = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth"][exercise_num - 1] if exercise_num <= 10 else f"{exercise_num}th"
+        
+        # Truncate exercise name for display
+        display_name = exercise['name'][:35] + "..." if len(exercise['name']) > 35 else exercise['name']
+        
+        # Use expander for each workout block
+        with st.expander(f"🏋️ {ordinal} Workout: {display_name}", expanded=False):
+            st.markdown(f"### {exercise['name']}")
+            st.markdown("---")
+            
+            # Try to extract sets/reps, form tips, etc. from description
+            desc_text = exercise['description'].lower() if exercise['description'] else ""
+            
+            # Look for sets/reps pattern
+            sets_reps_match = re.search(r'(\d+)\s*(?:sets?|x)\s*(?:of\s*)?(\d+)', desc_text)
+            if sets_reps_match:
+                st.markdown(f"**📊 Sets/Reps:** {sets_reps_match.group(1)} sets x {sets_reps_match.group(2)} reps")
+            
+            # Look for rest period
+            rest_match = re.search(r'rest[:\s]+(\d+[-\s]?\d*)\s*(?:seconds?|sec|minutes?|min)', desc_text)
+            if rest_match:
+                st.markdown(f"**⏱️ Rest:** {rest_match.group(1)}")
+            
+            # Look for weight information
+            weight_match = re.search(r'(\d+[-\s]?\d*)\s*(?:lbs?|kg|pounds?|kilograms?)', desc_text)
+            if weight_match:
+                st.markdown(f"**🏋️ Weight:** {weight_match.group(1)}")
+            
+            # Display description
+            if exercise['description']:
+                st.markdown("---")
+                st.markdown("#### 📝 Description & Instructions")
+                st.markdown(exercise['description'])
                 
-                with col:
-                    # Create workout block button
-                    ordinal = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth"][exercise_num - 1] if exercise_num <= 10 else f"{exercise_num}th"
-                    
-                    # Truncate exercise name for display
-                    display_name = exercise['name'][:35] + "..." if len(exercise['name']) > 35 else exercise['name']
-                    
-                    # Use expander for each workout block
-                    with st.expander(f"🏋️ {ordinal} Workout: {display_name}", expanded=False):
-                        st.markdown(f"### {exercise['name']}")
-                        st.markdown("---")
-                        
-                        # Try to extract sets/reps, form tips, etc. from description
-                        desc_text = exercise['description'].lower() if exercise['description'] else ""
-                        
-                        # Look for sets/reps pattern
-                        sets_reps_match = re.search(r'(\d+)\s*(?:sets?|x)\s*(?:of\s*)?(\d+)', desc_text)
-                        if sets_reps_match:
-                            st.markdown(f"**📊 Sets/Reps:** {sets_reps_match.group(1)} sets x {sets_reps_match.group(2)} reps")
-                        
-                        # Look for rest period
-                        rest_match = re.search(r'rest[:\s]+(\d+[-\s]?\d*)\s*(?:seconds?|sec|minutes?|min)', desc_text)
-                        if rest_match:
-                            st.markdown(f"**⏱️ Rest:** {rest_match.group(1)}")
-                        
-                        # Look for weight information
-                        weight_match = re.search(r'(\d+[-\s]?\d*)\s*(?:lbs?|kg|pounds?|kilograms?)', desc_text)
-                        if weight_match:
-                            st.markdown(f"**🏋️ Weight:** {weight_match.group(1)}")
-                        
-                        # Display description
-                        if exercise['description']:
-                            st.markdown("---")
-                            st.markdown("#### 📝 Description & Instructions")
-                            st.markdown(exercise['description'])
-                            
-                            # Try to extract form tips
-                            form_keywords = ['form', 'technique', 'posture', 'position', 'keep', 'maintain', 'avoid']
-                            if any(keyword in desc_text for keyword in form_keywords):
-                                st.markdown("---")
-                                st.markdown("#### ✅ Proper Form Tips")
-                                # Extract sentences with form-related keywords
-                                sentences = exercise['description'].split('.')
-                                form_sentences = [s.strip() + '.' for s in sentences if any(keyword in s.lower() for keyword in form_keywords)]
-                                if form_sentences:
-                                    for tip in form_sentences[:3]:  # Show up to 3 form tips
-                                        st.markdown(f"• {tip}")
+                # Try to extract form tips
+                form_keywords = ['form', 'technique', 'posture', 'position', 'keep', 'maintain', 'avoid']
+                if any(keyword in desc_text for keyword in form_keywords):
+                    st.markdown("---")
+                    st.markdown("#### ✅ Proper Form Tips")
+                    # Extract sentences with form-related keywords
+                    sentences = exercise['description'].split('.')
+                    form_sentences = [s.strip() + '.' for s in sentences if any(keyword in s.lower() for keyword in form_keywords)]
+                    if form_sentences:
+                        for tip in form_sentences[:3]:  # Show up to 3 form tips
+                            st.markdown(f"• {tip}")
     
     return True
 
